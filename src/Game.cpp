@@ -9,11 +9,6 @@
 #include "SfxPlayer.hpp"
 #include "Entities.hpp"
 
-const int TotalWidth = 30;
-const int PillarSpace = 200;
-const int PillarGap = 120;
-const int JumpVelocity = 3;
-
 void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &gameState)
 {
     flappy.rect.x = 100.0f;
@@ -28,17 +23,17 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
     {
         pillars[i].bottom.x = x;
         pillars[i].bottom.y = y;
-        pillars[i].bottom.width = TotalWidth;
-        pillars[i].bottom.height = 1000;
+        pillars[i].bottom.width = PILLAR_WIDTH;
+        pillars[i].bottom.height = PILLAR_HEIGHT;
 
         pillars[i].top.x = x;
-        pillars[i].top.y = y - 1000 - PillarGap;
-        pillars[i].top.width = TotalWidth;
-        pillars[i].top.height = 1000;
+        pillars[i].top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
+        pillars[i].top.width = PILLAR_WIDTH;
+        pillars[i].top.height = PILLAR_HEIGHT;
 
         pillars[i].isScored = false;
 
-        x += PillarSpace;
+        x += PILLAR_SPACE;
         y += 50;
     }
 
@@ -78,10 +73,10 @@ void Game::UpdatePillars(Pillar *pillars, Flappy &flappy)
         }
 
         int y = GetRandomValue(120, SCREEN_HEIGHT - 20);
-        pillars[TOTAL_PILLARS - 1].bottom.x += PillarSpace;
-        pillars[TOTAL_PILLARS - 1].top.x += PillarSpace;
+        pillars[TOTAL_PILLARS - 1].bottom.x += PILLAR_SPACE;
+        pillars[TOTAL_PILLARS - 1].top.x += PILLAR_SPACE;
         pillars[TOTAL_PILLARS - 1].bottom.y = y;
-        pillars[TOTAL_PILLARS - 1].top.y = y - 1000 - PillarGap;
+        pillars[TOTAL_PILLARS - 1].top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
         pillars[TOTAL_PILLARS - 1].isScored = false;
     }
 }
@@ -252,7 +247,7 @@ void Game::Run() {
 
             if (flappy.isJumping)
             {
-                flappy.velocity = JumpVelocity;
+                flappy.velocity = JUMP_VELOCITY;
                 flappy.rotationVelocity = 45.0f;
                 sfxPlayer.Play(SfxType::Jump);
             }
