@@ -34,7 +34,11 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
         pillars[i].isScored = false;
 
         x += PILLAR_SPACE;
-        y += 50;
+
+        if (i < 5)
+            y += 50;
+        else
+            y = GetRandomValue(120, SCREEN_HEIGHT - 20);
     }
 
     gameState.score = 0;
@@ -42,6 +46,8 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
 
 void Game::UpdatePhysics(Flappy &flappy)
 {
+    float deltaTime = GetFrameTime();
+
     // Apply gravity
     flappy.velocity -= .1;
 
@@ -49,7 +55,7 @@ void Game::UpdatePhysics(Flappy &flappy)
     flappy.rect.y -= flappy.velocity;
 
     // Apply speed
-    flappy.rect.x++;
+    flappy.rect.x += 100.0f * deltaTime;
 
     if (flappy.rotationVelocity > 0)
     {
@@ -62,7 +68,7 @@ void Game::UpdatePhysics(Flappy &flappy)
 
 void Game::UpdatePillars(Pillar *pillars, Flappy &flappy)
 {
-    bool doShift = pillars[0].bottom.x < flappy.rect.x - 160;
+    bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 6);
 
     if (doShift)
     {
@@ -96,14 +102,14 @@ bool Game::HandleScore(Pillar *pillars, Flappy &flappy, GameState &gameState)
 
 void Game::UpdateBackground(Background &background)
 {
-    background.parallaxX -= 0.5f;
+    background.parallaxX += 0.5f;
     if (background.parallaxX <= -128.0f)
         background.parallaxX += 128.0f;
 }
 
 void Game::UpdateBanner(Label &banner)
 {
-    banner.x -= 0.5f;
+    banner.x += 0.5f;
     if (banner.x <= -300.0f)
     {
         banner.x = SCREEN_WIDTH + 200;
@@ -119,19 +125,30 @@ void Game::RandomizeBanner(Label &banner)
 
 void Game::UpdateDeathState(Flappy &flappy, Pillar *pillars)
 {
-    flappy.isDead = 
-        CheckCollisionRecs(flappy.rect, pillars[0].bottom)
-        || CheckCollisionRecs(flappy.rect, pillars[0].top)
-        || flappy.rect.y > SCREEN_HEIGHT * 2;
+    Rectangle flappyHitBox = { flappy.rect.x + 2, flappy.rect.y + 2, flappy.rect.width - 4, flappy.rect.height - 4 };
 
+    for (int i = 0; i < TOTAL_PILLARS; i++)
+    {
+        auto pillar = pillars[i];
+
+        flappy.isDead = 
+            CheckCollisionRecs(flappyHitBox, pillar.bottom)
+            || CheckCollisionRecs(flappyHitBox, pillar.top)
+            || flappy.rect.y > SCREEN_HEIGHT * 4;
+        
+        if (flappy.isDead)
+            break;
+    }
 }
 
-void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, Pillar *pillars)
+void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, Pillar *pillars, Background &background, Label &banner)
 {
     if (flappy.rect.x > SCREEN_WIDTH)
     {
         flappy.rect.x -= SCREEN_WIDTH;
         camera.target.x -= SCREEN_WIDTH;
+        background.parallaxX -= SCREEN_WIDTH;
+        banner.x -= SCREEN_WIDTH;
         for (int i = 0; i < TOTAL_PILLARS; i++)
         {
             pillars[i].bottom.x -= SCREEN_WIDTH;
@@ -143,6 +160,7 @@ void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, Pillar *pillars)
 void Game::Initialize()
 {
     SetRandomSeed((unsigned int)time(NULL));
+    SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flappy Oik");
     InitAudioDevice();
     SetExitKey(KEY_Q);
@@ -186,7 +204,7 @@ void Game::Run() {
     gameOverLabel.isVisible = false;
 
     Label banner;
-    banner.x = 100;
+    banner.x = 200;
     banner.y = 100;
     banner.rotation = GetRandomValue(0, 180);
     banner.fontSize = 40;
@@ -198,6 +216,7 @@ void Game::Run() {
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
+    camera.target = { 0, 0 };
     camera.offset = (Vector2) { 100.0f, SCREEN_HEIGHT / 2.0f };
 
     this->Reset(flappy, pillars, camera, gameState);
@@ -228,6 +247,12 @@ void Game::Run() {
         if (IsKeyPressed(KEY_ESCAPE))
         {
             gameState.isPaused = true;
+        }
+
+        if ((IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER))
+            || (IsKeyDown(KEY_RIGHT_ALT) && IsKeyPressed(KEY_ENTER)))
+        {
+            ToggleFullscreen();
         }
 
         // Loop part that should be paused
@@ -268,31 +293,66 @@ void Game::Run() {
         if (gameState.deathTimer > 0)
             gameState.deathTimer -= deltaTime;
 
-        // Camera follows player
-        camera.target = (Vector2) { roundf(flappy.rect.x), roundf(SCREEN_HEIGHT / 2) };
-
         // Fix for webassembly cam jigering
-        this->ShiftScreen(flappy, camera, pillars);
+        this->ShiftScreen(flappy, camera, pillars, background, banner);
 
         // Reset values
         flappy.isJumping = false;
 
+        int screenWidth = GetRenderWidth();
+        int screenHeight = GetRenderHeight();
+
+        if (screenWidth < SCREEN_WIDTH || screenHeight < SCREEN_HEIGHT) {
+            SetWindowSize(
+                screenWidth < SCREEN_WIDTH ? SCREEN_WIDTH : screenWidth,
+                screenHeight < SCREEN_HEIGHT ? SCREEN_HEIGHT : screenHeight
+            );
+        }
+
+        float scaleX = (float)screenWidth / SCREEN_WIDTH;
+        float scaleY = (float)screenHeight / SCREEN_HEIGHT;
+        float scale = fminf(scaleX, scaleY);
+
+        camera.zoom = scale;
+
+        // Camera follows player
+        camera.target = (Vector2) { roundf(flappy.rect.x), roundf(SCREEN_HEIGHT / 2) };
+
+        camera.offset = {
+            100.0f + (screenWidth - SCREEN_WIDTH * scale) / 2.0f,
+            (SCREEN_HEIGHT * scale) / 2.0f + (screenHeight - SCREEN_HEIGHT * scale) / 2.0f
+        };
+
         // Update labels
+        scoreLabel.fontSize = 20.0f * scale;
+        scoreLabel.x = screenWidth / 2 - MeasureText(scoreLabel.text, scoreLabel.fontSize) / 2;
         scoreLabel.text = TextFormat("Score: %d", gameState.score);
+
+        deadLabel.fontSize = 40.0f * scale;
+        deadLabel.x = screenWidth / 2 - MeasureText(deadLabel.text, deadLabel.fontSize) / 2;
+        deadLabel.y = screenHeight / 2;
         deadLabel.isVisible = gameState.deathTimer > 0;
         deadLabel.text = TextFormat("You are DEAD!!! (%d)", (int)gameState.deathTimer);
+
+        pauseLabel.fontSize = 30.0f * scale;
+        pauseLabel.x = screenWidth / 2 - MeasureText(pauseLabel.text, pauseLabel.fontSize) / 2;
+        pauseLabel.y = screenHeight / 2;
         pauseLabel.isVisible = gameState.isPaused && !flappy.isDead;
+
+        gameOverLabel.fontSize = 30.0f * scale;
+        gameOverLabel.x = screenWidth / 2 - MeasureText(gameOverLabel.text, gameOverLabel.fontSize) / 2;
+        gameOverLabel.y = screenHeight / 2;
         gameOverLabel.isVisible = gameState.isPaused && flappy.isDead && gameState.deathTimer <= 0;
 
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground({ 0xAD, 0xCA, 0xFF, 0xFF });
+
+        BeginMode2D(camera);
 
         // Render background and background objects
         backgroundRenderer.Render(background);
         labelRenderer.Render(banner);
-
-        BeginMode2D(camera);
 
         // Render world objects
         flappyRenderer.Render(flappy);
@@ -310,10 +370,12 @@ void Game::Run() {
     }
 
     labelRenderer.Uninitialize();
-    backgroundRenderer.Unitialize();
+    backgroundRenderer.Uninitialize();
     pillarRenderer.Uninitialize();
     flappyRenderer.Uninitialize();
-    sfxPlayer.Unitialize();
+    sfxPlayer.Uninitialize();
+
+    delete[] pillars;
 }
 
 void Game::Uninitialize()

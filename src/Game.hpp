@@ -13,7 +13,7 @@ class Game {
     void UpdateBanner(Label &);
     void RandomizeBanner(Label &);
     void UpdateDeathState(Flappy &, Pillar *);
-    void ShiftScreen(Flappy &, Camera2D &, Pillar *);
+    void ShiftScreen(Flappy &, Camera2D &, Pillar *, Background &background, Label &banner);
 public:
     void Initialize();
     void Run();

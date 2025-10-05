@@ -7,20 +7,22 @@ void BackgroundRenderer::Initialize()
 
 void BackgroundRenderer::Render(Background &background)
 {
-    for (int i = 0; i < 8; i++)
+    for (float i = -6; i < 18; i++)
     {
-        for (int j = 0; j < 5; j++)
+        for (float j = -6; j < 18; j++)
         {
-            DrawTexture(
+            DrawTexturePro(
                 _texture,
-                background.parallaxX + i * 128,
-                j * 128,
+                { 0, 0, 128, 128 },
+                { background.parallaxX + i * 128, j * 128, 128, 128 },
+                { 0, 0 },
+                0.0f,
                 WHITE);
         }
     }
 }
 
-void BackgroundRenderer::Unitialize()
+void BackgroundRenderer::Uninitialize()
 {
     UnloadTexture(_texture);
 }

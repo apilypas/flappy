@@ -30,7 +30,7 @@ void SfxPlayer::Play(SfxType sfxType)
         Play(_hitSound);
 }
 
-void SfxPlayer::Unitialize()
+void SfxPlayer::Uninitialize()
 {
     UnloadSound(_jumpSound);
     UnloadSound(_hitSound);

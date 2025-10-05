@@ -12,7 +12,7 @@ void PillarRenderer::Render(Pillar *pillars)
     {
         auto pillar = pillars[i];
 
-        for (float y = pillar.bottom.y; y < SCREEN_HEIGHT; y += 32)
+        for (float y = pillar.bottom.y; y < pillar.bottom.height; y += 32)
         {
             DrawTexturePro(
                 _texture,
@@ -23,7 +23,7 @@ void PillarRenderer::Render(Pillar *pillars)
                 WHITE);
         }
 
-        for (float y = pillar.top.y + pillar.top.height - 32; y > -32; y -= 32)
+        for (float y = pillar.top.y; y < pillar.top.y + pillar.top.height - 0.1; y += 32)
         {
             DrawTexturePro(
                 _texture,

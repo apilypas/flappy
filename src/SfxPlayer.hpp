@@ -16,5 +16,5 @@ class SfxPlayer {
 public:
     void Initialize();
     void Play(SfxType);
-    void Unitialize();
+    void Uninitialize();
 };

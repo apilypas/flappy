@@ -7,5 +7,5 @@ class BackgroundRenderer {
 public:
     void Initialize();
     void Render(Background &);
-    void Unitialize();
+    void Uninitialize();
 };
