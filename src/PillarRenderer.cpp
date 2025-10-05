@@ -12,21 +12,25 @@ void PillarRenderer::Render(Pillar *pillars)
     {
         auto pillar = pillars[i];
 
-        for (int y = pillar.bottom.y; y < SCREEN_HEIGHT; y += 32)
+        for (float y = pillar.bottom.y; y < SCREEN_HEIGHT; y += 32)
         {
-            DrawTexture(
+            DrawTexturePro(
                 _texture,
-                pillar.bottom.x,
-                y,
+                { 0, 0, 32, 32 },
+                { pillar.bottom.x, y, 32, 32},
+                { 0, 0 },
+                0.0f,
                 WHITE);
         }
 
-        for (int y = pillar.top.y + pillar.top.height - 32; y > -32; y -= 32)
+        for (float y = pillar.top.y + pillar.top.height - 32; y > -32; y -= 32)
         {
-            DrawTexture(
+            DrawTexturePro(
                 _texture,
-                pillar.top.x,
-                y,
+                { 0, 0, 32, 32 },
+                { pillar.top.x, y, 32, 32},
+                { 0, 0 },
+                0.0f,
                 WHITE);
         }
     }
