@@ -362,8 +362,8 @@ void Game::Run() {
         labelRenderer.Render(banner);
 
         // Render world objects
-        flappyRenderer.Render(flappy);
         pillarRenderer.Render(pillars);
+        flappyRenderer.Render(flappy);
 
         EndMode2D();
 
