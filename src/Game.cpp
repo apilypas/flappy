@@ -10,7 +10,7 @@
 #include "SfxPlayer.hpp"
 #include "Entities.hpp"
 
-void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, Camera2D &camera, GameState &gameState)
+void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, GameState &gameState)
 {
     flappy.rect.x = 100.0f;
     flappy.rect.y = 100.0f;
@@ -23,7 +23,7 @@ void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, Camera2D &camera,
 
     pillars.clear();
 
-    for (int i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
+    for (float i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
     {
         auto pillar = CreatePillar(x, y);
 
@@ -32,7 +32,7 @@ void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, Camera2D &camera,
         if (i < 5)
             y += 50;
         else
-            y = GetRandomValue(120, SCREEN_HEIGHT - 20);
+            y = (float)GetRandomValue(120, SCREEN_HEIGHT - 20);
 
         pillars.push_back(pillar);
     }
@@ -64,7 +64,7 @@ void Game::UpdatePhysics(Flappy &flappy)
     float deltaTime = GetFrameTime();
 
     // Apply gravity
-    flappy.velocity -= .1;
+    flappy.velocity -= 0.1f;
 
     // Calculate y
     flappy.rect.y -= flappy.velocity;
@@ -76,8 +76,8 @@ void Game::UpdatePhysics(Flappy &flappy)
     {
         flappy.rotationVelocity -= 1.0f;
         flappy.rotation += flappy.rotationVelocity;
-        if (flappy.rotation > 360.0)
-            flappy.rotation -= 360.0;
+        if (flappy.rotation > 360.0f)
+            flappy.rotation -= 360.0f;
     }
 }
 
@@ -90,7 +90,7 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
         pillars.erase(pillars.begin());
 
         float x = pillars[pillars.size() - 1].top.x + PILLAR_SPACE;
-        float y = GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
+        float y = (float)GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
         
         auto pillar = CreatePillar(x, y);
         
@@ -184,12 +184,12 @@ Label Game::CreateBanner(float x, float y)
 
     banner.x = x;
     banner.y = y;
-    banner.rotation = GetRandomValue(0, 180);
+    banner.rotation = (float)GetRandomValue(0, 180);
     banner.fontSize = 40;
     banner.color = SKYBLUE;
     banner.shadowColor = BLUE;
     banner.isVisible = true;
-    banner.rotation = GetRandomValue(0, 180);
+    banner.rotation = (float)GetRandomValue(0, 180);
     banner.text = _bannerMessageSource.GetRandom();
 
     int colorChoice = GetRandomValue(0, 2);
@@ -264,9 +264,9 @@ void Game::Run() {
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
     camera.target = { 0, 0 };
-    camera.offset = (Vector2) { 100.0f, SCREEN_HEIGHT / 2.0f };
+    camera.offset = { 100.0f, SCREEN_HEIGHT / 2.0f };
 
-    this->Reset(flappy, pillars, camera, gameState);
+    this->Reset(flappy, pillars, gameState);
 
     BackgroundRenderer backgroundRenderer;
     FlappyRenderer flappyRenderer;
@@ -316,7 +316,7 @@ void Game::Run() {
             if (flappy.isDead)
             {
                 flappy.isDead = false;
-                this->Reset(flappy, pillars, camera, gameState);
+                this->Reset(flappy, pillars, gameState);
             }
 
             this->UpdatePhysics(flappy);
@@ -374,32 +374,32 @@ void Game::Run() {
         camera.zoom = scale;
 
         // Camera follows player
-        camera.target = { roundf(flappy.rect.x), roundf(SCREEN_HEIGHT / 2) };
+        camera.target = { roundf(flappy.rect.x), roundf((float)SCREEN_HEIGHT / 2) };
 
         camera.offset = {
-            100.0f + (screenWidth - SCREEN_WIDTH * scale) / 2.0f,
-            (SCREEN_HEIGHT * scale) / 2.0f + (screenHeight - SCREEN_HEIGHT * scale) / 2.0f
+            100.0f + ((float)screenWidth - SCREEN_WIDTH * scale) / 2.0f,
+            (SCREEN_HEIGHT * scale) / 2.0f + ((float)screenHeight - SCREEN_HEIGHT * scale) / 2.0f
         };
 
         // Update labels
         scoreLabel.fontSize = 20.0f * scale;
-        scoreLabel.x = screenWidth / 2 - MeasureText(scoreLabel.text, scoreLabel.fontSize) / 2;
+        scoreLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(scoreLabel.text, (int)scoreLabel.fontSize) / 2;
         scoreLabel.text = TextFormat("Score: %d", gameState.score);
 
         deadLabel.fontSize = 40.0f * scale;
-        deadLabel.x = screenWidth / 2 - MeasureText(deadLabel.text, deadLabel.fontSize) / 2;
-        deadLabel.y = screenHeight / 2;
+        deadLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(deadLabel.text, (int)deadLabel.fontSize) / 2;
+        deadLabel.y = (float)screenHeight / 2.0f;
         deadLabel.isVisible = gameState.deathTimer > 0;
         deadLabel.text = TextFormat("You are DEAD!!! (%d)", (int)gameState.deathTimer);
 
         pauseLabel.fontSize = 30.0f * scale;
-        pauseLabel.x = screenWidth / 2 - MeasureText(pauseLabel.text, pauseLabel.fontSize) / 2;
-        pauseLabel.y = screenHeight / 2;
+        pauseLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(pauseLabel.text, (int)pauseLabel.fontSize) / 2;
+        pauseLabel.y = (float)screenHeight / 2.0f;
         pauseLabel.isVisible = gameState.isPaused && !flappy.isDead;
 
         gameOverLabel.fontSize = 30.0f * scale;
-        gameOverLabel.x = screenWidth / 2 - MeasureText(gameOverLabel.text, gameOverLabel.fontSize) / 2;
-        gameOverLabel.y = screenHeight / 2;
+        gameOverLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(gameOverLabel.text, (int)gameOverLabel.fontSize) / 2;
+        gameOverLabel.y = (float)screenHeight / 2.0f;
         gameOverLabel.isVisible = gameState.isPaused && flappy.isDead && gameState.deathTimer <= 0;
 
         BeginDrawing();

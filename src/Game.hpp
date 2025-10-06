@@ -6,7 +6,7 @@
 
 class Game {
     BannerMessageSource _bannerMessageSource;
-    void Reset(Flappy&, std::vector<Pillar>&, Camera2D&, GameState&);
+    void Reset(Flappy&, std::vector<Pillar>&, GameState&);
     Pillar CreatePillar(float x, float y);
     void UpdatePhysics(Flappy&);
     void UpdatePillars(std::vector<Pillar>&, Flappy&);

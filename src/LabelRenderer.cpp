@@ -16,8 +16,8 @@ void LabelRenderer::Render(Label &label)
         DrawTextPro(
             _font,
             label.text,
-            (Vector2) { label.x + shadowOffset, label.y + shadowOffset },
-            (Vector2) { 0, 0 },
+            { label.x + shadowOffset, label.y + shadowOffset },
+            { 0, 0 },
             label.rotation,
             label.fontSize,
             spacing,
@@ -26,8 +26,8 @@ void LabelRenderer::Render(Label &label)
         DrawTextPro(
             _font,
             label.text,
-            (Vector2) { (float)label.x , (float)label.y },
-            (Vector2) { 0, 0 },
+            { (float)label.x , (float)label.y },
+            { 0, 0 },
             label.rotation,
             label.fontSize,
             spacing,

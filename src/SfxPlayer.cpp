@@ -2,7 +2,7 @@
 
 void SfxPlayer::PlayWithRandomPitch(Sound sound)
 {
-    float pitch = GetRandomValue(80, 120) / 100.0f;
+    auto pitch = (float)GetRandomValue(80, 120) / 100.0f;
     SetSoundPitch(sound, pitch);
     PlaySound(sound);
 }

@@ -37,7 +37,7 @@ struct Label
     const char *text = "";
     float x = 0;
     float y = 0;
-    int fontSize = 0;
+    float fontSize = 0;
     Color color = BLACK;
     Color shadowColor = BLACK;
     bool isVisible = false;
