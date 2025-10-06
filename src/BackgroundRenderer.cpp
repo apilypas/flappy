@@ -7,7 +7,7 @@ void BackgroundRenderer::Initialize()
 
 void BackgroundRenderer::Render(Background &background)
 {
-    for (float i = -6; i < 18; i++)
+    for (float i = -7; i < 18; i++)
     {
         for (float j = -6; j < 18; j++)
         {

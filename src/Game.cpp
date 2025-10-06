@@ -78,7 +78,7 @@ void Game::UpdatePhysics(Flappy &flappy)
 
 void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scrollBy)
 {
-    bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 6);
+    bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 7);
 
     if (doShift)
     {
@@ -163,27 +163,6 @@ void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
     }
 }
 
-void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, std::vector<Pillar> &pillars, Background &background, std::vector<Label> &banners)
-{
-    if (flappy.rect.x > SCREEN_WIDTH)
-    {
-        flappy.rect.x -= SCREEN_WIDTH;
-        camera.target.x -= SCREEN_WIDTH;
-        background.parallaxX -= SCREEN_WIDTH;
-        
-        for (auto &pillar : pillars)
-        {
-            pillar.bottom.x -= SCREEN_WIDTH;
-            pillar.top.x -= SCREEN_WIDTH;
-        }
-
-        for (auto &banner : banners)
-        {
-            banner.x -= SCREEN_WIDTH;
-        }
-    }
-}
-
 Label Game::CreateBanner(float x, float y)
 {
     Label banner;
@@ -264,13 +243,14 @@ void Game::Run() {
     gameOverLabel.color = WHITE;
     gameOverLabel.isVisible = false;
 
-    banners.push_back(this->CreateBanner(200, 100));
+    banners.push_back(this->CreateBanner(300, 100));
+    this->UpdateBanners(banners, 0.0f);
 
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
-    camera.target = { roundf(flappy.rect.x), roundf((float)SCREEN_HEIGHT / 2) };
-    camera.offset = { 100.0f, SCREEN_HEIGHT / 2.0f };
+    camera.target = { flappy.rect.x + 60.0f, (float)SCREEN_HEIGHT / 2.0f };
+    camera.offset = { 0.0f, 0.0f };
 
     this->Reset(flappy, pillars, gameState);
 
@@ -357,9 +337,6 @@ void Game::Run() {
 
         if (gameState.deathTimer > 0)
             gameState.deathTimer -= deltaTime;
-
-        // Fix for webassembly cam jigering
-        this->ShiftScreen(flappy, camera, pillars, background, banners);
 
         // Reset values
         flappy.isJumping = false;

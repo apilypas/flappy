@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "raylib.h"
 #include "Entities.hpp"
 #include "BannerMessageSource.hpp"
 
@@ -14,7 +13,6 @@ class Game {
     void UpdateBackground(Background&, float);
     void UpdateBanners(std::vector<Label>&, float);
     void UpdateDeathState(Flappy&, std::vector<Pillar>&);
-    void ShiftScreen(Flappy&, Camera2D&, std::vector<Pillar>&, Background&, std::vector<Label>&);
     Label CreateBanner(float x, float y);
 public:
     void Initialize();
