@@ -18,8 +18,9 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
     flappy.velocity = 0.0f;
     flappy.rotation = 0.0f;
     flappy.rotationVelocity = 0.0f;
+    flappy.speed = INITIAL_SPEED;
 
-    for (int i = 0, x = 300, y = 140; i < TOTAL_PILLARS; i++)
+    for (int i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
     {
         pillars[i].bottom.x = x;
         pillars[i].bottom.y = y;
@@ -55,7 +56,7 @@ void Game::UpdatePhysics(Flappy &flappy)
     flappy.rect.y -= flappy.velocity;
 
     // Apply speed
-    flappy.rect.x += 100.0f * deltaTime;
+    flappy.rect.x += flappy.speed * deltaTime;
 
     if (flappy.rotationVelocity > 0)
     {
@@ -284,6 +285,9 @@ void Game::Run() {
             this->UpdateBanner(banner);
 
             this->UpdateDeathState(flappy, pillars);
+
+            // Increase speed over time
+            flappy.speed += deltaTime * 2.0f;
 
             if (flappy.isDead)
             {

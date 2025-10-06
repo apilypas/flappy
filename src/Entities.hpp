@@ -16,6 +16,7 @@ struct Flappy
     float rotationVelocity = 0.0f;
     bool isJumping = false;
     bool isDead = false;
+    float speed = INITIAL_SPEED;
 };
 
 struct Pillar
