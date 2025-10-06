@@ -220,6 +220,7 @@ void Game::Initialize()
 }
 
 void Game::Run() {
+    bool showDebug = false;
     GameState gameState;
     Flappy flappy;
     std::vector<Pillar> pillars;
@@ -284,7 +285,10 @@ void Game::Run() {
         float deltaTime = GetFrameTime();
 
         // Handle inputs
-        if (IsKeyPressed(KEY_SPACE))
+        if (IsKeyPressed(KEY_SPACE)
+            || IsKeyPressed(KEY_UP)
+            || IsKeyPressed(KEY_W)
+            || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             flappy.isJumping = true;
             gameState.isPaused = gameState.deathTimer > 0;
@@ -299,6 +303,11 @@ void Game::Run() {
             || (IsKeyDown(KEY_RIGHT_ALT) && IsKeyPressed(KEY_ENTER)))
         {
             ToggleFullscreen();
+        }
+
+        if (IsKeyPressed(KEY_F12))
+        {
+            showDebug = !showDebug;
         }
 
         // Loop part that should be paused
@@ -365,7 +374,7 @@ void Game::Run() {
         camera.zoom = scale;
 
         // Camera follows player
-        camera.target = (Vector2) { roundf(flappy.rect.x), roundf(SCREEN_HEIGHT / 2) };
+        camera.target = { roundf(flappy.rect.x), roundf(SCREEN_HEIGHT / 2) };
 
         camera.offset = {
             100.0f + (screenWidth - SCREEN_WIDTH * scale) / 2.0f,
@@ -416,6 +425,11 @@ void Game::Run() {
         labelRenderer.Render(deadLabel);
         labelRenderer.Render(pauseLabel);
         labelRenderer.Render(gameOverLabel);
+
+        if (showDebug)
+        {
+            DrawFPS(10, 10);
+        }
 
         EndDrawing();
     }

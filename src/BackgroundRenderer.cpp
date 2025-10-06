@@ -14,7 +14,7 @@ void BackgroundRenderer::Render(Background &background)
             DrawTexturePro(
                 _texture,
                 { 0, 0, 128, 128 },
-                { background.parallaxX + i * 128, j * 128, 128, 128 },
+                { background.parallaxX + (float)i * 128.0f, (float)j * 128.0f, 128, 128 },
                 { 0, 0 },
                 0.0f,
                 WHITE);
