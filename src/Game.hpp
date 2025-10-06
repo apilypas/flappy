@@ -9,10 +9,10 @@ class Game {
     void Reset(Flappy&, std::vector<Pillar>&, GameState&);
     Pillar CreatePillar(float x, float y);
     void UpdatePhysics(Flappy&);
-    void UpdatePillars(std::vector<Pillar>&, Flappy&);
+    void UpdatePillars(std::vector<Pillar>&, Flappy&, float);
     bool HandleScore(std::vector<Pillar>&, Flappy&, GameState&);
-    void UpdateBackground(Background&);
-    void UpdateBanners(std::vector<Label>&);
+    void UpdateBackground(Background&, float);
+    void UpdateBanners(std::vector<Label>&, float);
     void UpdateDeathState(Flappy&, std::vector<Pillar>&);
     void ShiftScreen(Flappy&, Camera2D&, std::vector<Pillar>&, Background&, std::vector<Label>&);
     Label CreateBanner(float x, float y);

@@ -61,16 +61,11 @@ Pillar Game::CreatePillar(float x, float y)
 
 void Game::UpdatePhysics(Flappy &flappy)
 {
-    float deltaTime = GetFrameTime();
-
     // Apply gravity
     flappy.velocity -= 0.1f;
 
     // Calculate y
     flappy.rect.y -= flappy.velocity;
-
-    // Apply speed
-    flappy.rect.x += flappy.speed * deltaTime;
 
     if (flappy.rotationVelocity > 0)
     {
@@ -81,7 +76,7 @@ void Game::UpdatePhysics(Flappy &flappy)
     }
 }
 
-void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
+void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scrollBy)
 {
     bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 6);
 
@@ -95,6 +90,12 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
         auto pillar = CreatePillar(x, y);
         
         pillars.push_back(pillar);
+    }
+
+    for (auto &pillar : pillars)
+    {
+        pillar.top.x -= scrollBy;
+        pillar.bottom.x -= scrollBy;
     }
 }
 
@@ -114,18 +115,18 @@ bool Game::HandleScore(std::vector<Pillar> &pillars, Flappy &flappy, GameState &
     return false;
 }
 
-void Game::UpdateBackground(Background &background)
+void Game::UpdateBackground(Background &background, float scrollBy)
 {
-    background.parallaxX += 0.5f;
+    background.parallaxX -= scrollBy / 2.0f;
     if (background.parallaxX <= -128.0f)
         background.parallaxX += 128.0f;
 }
 
-void Game::UpdateBanners(std::vector<Label> &banners)
+void Game::UpdateBanners(std::vector<Label> &banners, float scrollBy)
 {
     for (auto &banner : banners)
     {
-        banner.x += 0.5f;
+        banner.x -= scrollBy / 2.0f;
     }
 
     auto last = banners[banners.size() - 1];
@@ -143,7 +144,12 @@ void Game::UpdateBanners(std::vector<Label> &banners)
 
 void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
 {
-    Rectangle flappyHitBox = { flappy.rect.x + 2, flappy.rect.y + 2, flappy.rect.width - 4, flappy.rect.height - 4 };
+    Rectangle flappyHitBox = { 
+        flappy.rect.x + 4, 
+        flappy.rect.y + 4, 
+        flappy.rect.width - 8, 
+        flappy.rect.height - 8 
+    };
 
     for (auto &pillar : pillars)
     {
@@ -212,7 +218,7 @@ Label Game::CreateBanner(float x, float y)
 void Game::Initialize()
 {
     SetRandomSeed((unsigned int)time(NULL));
-    SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flappy Oik");
     InitAudioDevice();
     SetExitKey(KEY_Q);
@@ -263,7 +269,7 @@ void Game::Run() {
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
-    camera.target = { 0, 0 };
+    camera.target = { roundf(flappy.rect.x), roundf((float)SCREEN_HEIGHT / 2) };
     camera.offset = { 100.0f, SCREEN_HEIGHT / 2.0f };
 
     this->Reset(flappy, pillars, gameState);
@@ -283,6 +289,7 @@ void Game::Run() {
     while (!WindowShouldClose())
     {
         float deltaTime = GetFrameTime();
+        float scrollByX = flappy.speed * deltaTime;
 
         // Handle inputs
         if (IsKeyPressed(KEY_SPACE)
@@ -320,7 +327,7 @@ void Game::Run() {
             }
 
             this->UpdatePhysics(flappy);
-            this->UpdatePillars(pillars, flappy);
+            this->UpdatePillars(pillars, flappy, scrollByX);
             
             if (this->HandleScore(pillars, flappy, gameState))
                 sfxPlayer.Play(SfxType::Point);
@@ -332,8 +339,8 @@ void Game::Run() {
                 sfxPlayer.Play(SfxType::Jump);
             }
 
-            this->UpdateBackground(background);
-            this->UpdateBanners(banners);
+            this->UpdateBackground(background, scrollByX);
+            this->UpdateBanners(banners, scrollByX);
 
             this->UpdateDeathState(flappy, pillars);
 
@@ -372,9 +379,6 @@ void Game::Run() {
         float scale = fminf(scaleX, scaleY);
 
         camera.zoom = scale;
-
-        // Camera follows player
-        camera.target = { roundf(flappy.rect.x), roundf((float)SCREEN_HEIGHT / 2) };
 
         camera.offset = {
             100.0f + ((float)screenWidth - SCREEN_WIDTH * scale) / 2.0f,
