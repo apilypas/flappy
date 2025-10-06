@@ -10,6 +10,7 @@ void LabelRenderer::Render(Label &label)
     if (label.isVisible)
     {
         float shadowOffset = label.fontSize / 20.0f;
+        float spacing = label.fontSize / 10.0f;
 
         DrawTextPro(
             _font,
@@ -18,7 +19,7 @@ void LabelRenderer::Render(Label &label)
             (Vector2) { 0, 0 },
             label.rotation,
             label.fontSize,
-            2,
+            spacing,
             label.shadowColor);
 
         DrawTextPro(
@@ -28,7 +29,7 @@ void LabelRenderer::Render(Label &label)
             (Vector2) { 0, 0 },
             label.rotation,
             label.fontSize,
-            2,
+            spacing,
             label.color);
     }
 }

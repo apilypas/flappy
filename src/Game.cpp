@@ -75,7 +75,7 @@ void Game::UpdatePillars(Pillar *pillars, Flappy &flappy)
         for (int i = 0; i < TOTAL_PILLARS - 1; i++)
         {
             pillars[i] = pillars[i + 1];
-            pillars[i].isScored = false;
+            pillars[i].isScored = pillars[i].bottom.x < flappy.rect.x + flappy.rect.width;
         }
 
         int y = GetRandomValue(120, SCREEN_HEIGHT - 20);
@@ -89,12 +89,15 @@ void Game::UpdatePillars(Pillar *pillars, Flappy &flappy)
 
 bool Game::HandleScore(Pillar *pillars, Flappy &flappy, GameState &gameState)
 {
-    if (pillars[0].bottom.x < flappy.rect.x && !pillars[0].isScored)
+    for (int i = 0; i < TOTAL_PILLARS; i++)
     {
-        pillars[0].isScored = true;
-        gameState.score++;
+        if (pillars[i].bottom.x < flappy.rect.x && !pillars[i].isScored)
+        {
+            pillars[i].isScored = true;
+            gameState.score++;
 
-        return true;
+            return true;
+        }
     }
 
     return false;
