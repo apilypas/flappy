@@ -1,3 +1,4 @@
+#include <vector>
 #include "Constants.hpp"
 #include "PillarRenderer.hpp"
 
@@ -6,9 +7,9 @@ void PillarRenderer::Initialize()
     _texture = LoadTexture("assets/images/Block.png");
 }
 
-void PillarRenderer::Render(Pillar *pillars)
+void PillarRenderer::Render(std::vector<Pillar> &pillars)
 {
-    for (int i = 0; i < TOTAL_PILLARS; i++)
+    for (int i = 0; i < pillars.size(); i++)
     {
         auto pillar = pillars[i];
 

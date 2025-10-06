@@ -1,5 +1,6 @@
 #include <cmath>
 #include <ctime>
+#include <vector>
 #include "Constants.hpp"
 #include "Game.hpp"
 #include "FlappyRenderer.hpp"
@@ -9,7 +10,7 @@
 #include "SfxPlayer.hpp"
 #include "Entities.hpp"
 
-void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &gameState)
+void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, Camera2D &camera, GameState &gameState)
 {
     flappy.rect.x = 100.0f;
     flappy.rect.y = 100.0f;
@@ -20,19 +21,11 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
     flappy.rotationVelocity = 0.0f;
     flappy.speed = INITIAL_SPEED;
 
+    pillars.clear();
+
     for (int i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
     {
-        pillars[i].bottom.x = x;
-        pillars[i].bottom.y = y;
-        pillars[i].bottom.width = PILLAR_WIDTH;
-        pillars[i].bottom.height = PILLAR_HEIGHT;
-
-        pillars[i].top.x = x;
-        pillars[i].top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
-        pillars[i].top.width = PILLAR_WIDTH;
-        pillars[i].top.height = PILLAR_HEIGHT;
-
-        pillars[i].isScored = false;
+        auto pillar = CreatePillar(x, y);
 
         x += PILLAR_SPACE;
 
@@ -40,9 +33,30 @@ void Game::Reset(Flappy &flappy, Pillar *pillars, Camera2D &camera, GameState &g
             y += 50;
         else
             y = GetRandomValue(120, SCREEN_HEIGHT - 20);
+
+        pillars.push_back(pillar);
     }
 
     gameState.score = 0;
+}
+
+Pillar Game::CreatePillar(float x, float y)
+{
+    Pillar pillar;
+
+    pillar.bottom.x = x;
+    pillar.bottom.y = y;
+    pillar.bottom.width = PILLAR_WIDTH;
+    pillar.bottom.height = PILLAR_HEIGHT;
+
+    pillar.top.x = x;
+    pillar.top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
+    pillar.top.width = PILLAR_WIDTH;
+    pillar.top.height = PILLAR_HEIGHT;
+
+    pillar.isScored = false;
+
+    return pillar;
 }
 
 void Game::UpdatePhysics(Flappy &flappy)
@@ -67,30 +81,26 @@ void Game::UpdatePhysics(Flappy &flappy)
     }
 }
 
-void Game::UpdatePillars(Pillar *pillars, Flappy &flappy)
+void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
 {
     bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 6);
 
     if (doShift)
     {
-        for (int i = 0; i < TOTAL_PILLARS - 1; i++)
-        {
-            pillars[i] = pillars[i + 1];
-            pillars[i].isScored = pillars[i].bottom.x < flappy.rect.x + flappy.rect.width;
-        }
+        pillars.erase(pillars.begin());
 
-        int y = GetRandomValue(120, SCREEN_HEIGHT - 20);
-        pillars[TOTAL_PILLARS - 1].bottom.x += PILLAR_SPACE;
-        pillars[TOTAL_PILLARS - 1].top.x += PILLAR_SPACE;
-        pillars[TOTAL_PILLARS - 1].bottom.y = y;
-        pillars[TOTAL_PILLARS - 1].top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
-        pillars[TOTAL_PILLARS - 1].isScored = false;
+        float x = pillars[pillars.size() - 1].top.x + PILLAR_SPACE;
+        float y = GetRandomValue(120, SCREEN_HEIGHT - 20);
+        
+        auto pillar = CreatePillar(x, y);
+        
+        pillars.push_back(pillar);
     }
 }
 
-bool Game::HandleScore(Pillar *pillars, Flappy &flappy, GameState &gameState)
+bool Game::HandleScore(std::vector<Pillar> &pillars, Flappy &flappy, GameState &gameState)
 {
-    for (int i = 0; i < TOTAL_PILLARS; i++)
+    for (int i = 0; i < (int)pillars.size(); i++)
     {
         if (pillars[i].bottom.x < flappy.rect.x && !pillars[i].isScored)
         {
@@ -127,11 +137,11 @@ void Game::RandomizeBanner(Label &banner)
     banner.text = _bannerMessageSource.GetRandom();
 }
 
-void Game::UpdateDeathState(Flappy &flappy, Pillar *pillars)
+void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
 {
     Rectangle flappyHitBox = { flappy.rect.x + 2, flappy.rect.y + 2, flappy.rect.width - 4, flappy.rect.height - 4 };
 
-    for (int i = 0; i < TOTAL_PILLARS; i++)
+    for (int i = 0; i < (int)pillars.size(); i++)
     {
         auto pillar = pillars[i];
 
@@ -145,7 +155,7 @@ void Game::UpdateDeathState(Flappy &flappy, Pillar *pillars)
     }
 }
 
-void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, Pillar *pillars, Background &background, Label &banner)
+void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, std::vector<Pillar> &pillars, Background &background, Label &banner)
 {
     if (flappy.rect.x > SCREEN_WIDTH)
     {
@@ -153,7 +163,7 @@ void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, Pillar *pillars, Backgr
         camera.target.x -= SCREEN_WIDTH;
         background.parallaxX -= SCREEN_WIDTH;
         banner.x -= SCREEN_WIDTH;
-        for (int i = 0; i < TOTAL_PILLARS; i++)
+        for (int i = 0; i < (int)pillars.size(); i++)
         {
             pillars[i].bottom.x -= SCREEN_WIDTH;
             pillars[i].top.x -= SCREEN_WIDTH;
@@ -174,7 +184,8 @@ void Game::Initialize()
 void Game::Run() {
     GameState gameState;
     Flappy flappy;
-    Pillar* pillars = new Pillar[TOTAL_PILLARS];
+    std::vector<Pillar> pillars;
+    
     Background background;
 
     Label scoreLabel;
@@ -381,8 +392,6 @@ void Game::Run() {
     pillarRenderer.Uninitialize();
     flappyRenderer.Uninitialize();
     sfxPlayer.Uninitialize();
-
-    delete[] pillars;
 }
 
 void Game::Uninitialize()

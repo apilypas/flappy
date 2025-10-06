@@ -6,6 +6,6 @@ class PillarRenderer {
     Texture2D _texture;
 public:
     void Initialize();
-    void Render(Pillar*);
+    void Render(std::vector<Pillar>&);
     void Uninitialize();
 };

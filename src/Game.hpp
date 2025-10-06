@@ -5,15 +5,16 @@
 
 class Game {
     BannerMessageSource _bannerMessageSource;
-    void Reset(Flappy &, Pillar *, Camera2D &, GameState &);
-    void UpdatePhysics(Flappy &);
-    void UpdatePillars(Pillar *, Flappy &);
-    bool HandleScore(Pillar*, Flappy &, GameState &);
-    void UpdateBackground(Background &);
-    void UpdateBanner(Label &);
-    void RandomizeBanner(Label &);
-    void UpdateDeathState(Flappy &, Pillar *);
-    void ShiftScreen(Flappy &, Camera2D &, Pillar *, Background &background, Label &banner);
+    void Reset(Flappy&, std::vector<Pillar>&, Camera2D&, GameState&);
+    Pillar CreatePillar(float x, float y);
+    void UpdatePhysics(Flappy&);
+    void UpdatePillars(std::vector<Pillar>&, Flappy&);
+    bool HandleScore(std::vector<Pillar>&, Flappy&, GameState&);
+    void UpdateBackground(Background&);
+    void UpdateBanner(Label&);
+    void RandomizeBanner(Label&);
+    void UpdateDeathState(Flappy&, std::vector<Pillar>&);
+    void ShiftScreen(Flappy&, Camera2D&, std::vector<Pillar>&, Background&, Label&);
 public:
     void Initialize();
     void Run();
