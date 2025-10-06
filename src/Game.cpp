@@ -90,7 +90,7 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
         pillars.erase(pillars.begin());
 
         float x = pillars[pillars.size() - 1].top.x + PILLAR_SPACE;
-        float y = GetRandomValue(120, SCREEN_HEIGHT - 20);
+        float y = GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
         
         auto pillar = CreatePillar(x, y);
         
@@ -100,11 +100,11 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy)
 
 bool Game::HandleScore(std::vector<Pillar> &pillars, Flappy &flappy, GameState &gameState)
 {
-    for (int i = 0; i < (int)pillars.size(); i++)
+    for (auto &pillar : pillars)
     {
-        if (pillars[i].bottom.x < flappy.rect.x && !pillars[i].isScored)
+        if (pillar.bottom.x < flappy.rect.x && !pillar.isScored)
         {
-            pillars[i].isScored = true;
+            pillar.isScored = true;
             gameState.score++;
 
             return true;
@@ -121,30 +121,32 @@ void Game::UpdateBackground(Background &background)
         background.parallaxX += 128.0f;
 }
 
-void Game::UpdateBanner(Label &banner)
+void Game::UpdateBanners(std::vector<Label> &banners)
 {
-    banner.x += 0.5f;
-    if (banner.x <= -300.0f)
+    for (auto &banner : banners)
     {
-        banner.x = SCREEN_WIDTH + 200;
-        RandomizeBanner(banner);
+        banner.x += 0.5f;
     }
-}
 
-void Game::RandomizeBanner(Label &banner)
-{
-    banner.rotation = GetRandomValue(0, 180);
-    banner.text = _bannerMessageSource.GetRandom();
+    auto last = banners[banners.size() - 1];
+    if (last.x < SCREEN_WIDTH * 2)
+    {
+        auto banner = CreateBanner(last.x + SCREEN_WIDTH, last.y);
+        banners.push_back(banner);
+    }
+    
+    if (banners[0].x <= -SCREEN_WIDTH * 2)
+    {
+        banners.erase(banners.begin());
+    }
 }
 
 void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
 {
     Rectangle flappyHitBox = { flappy.rect.x + 2, flappy.rect.y + 2, flappy.rect.width - 4, flappy.rect.height - 4 };
 
-    for (int i = 0; i < (int)pillars.size(); i++)
+    for (auto &pillar : pillars)
     {
-        auto pillar = pillars[i];
-
         flappy.isDead = 
             CheckCollisionRecs(flappyHitBox, pillar.bottom)
             || CheckCollisionRecs(flappyHitBox, pillar.top)
@@ -155,20 +157,56 @@ void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
     }
 }
 
-void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, std::vector<Pillar> &pillars, Background &background, Label &banner)
+void Game::ShiftScreen(Flappy &flappy, Camera2D &camera, std::vector<Pillar> &pillars, Background &background, std::vector<Label> &banners)
 {
     if (flappy.rect.x > SCREEN_WIDTH)
     {
         flappy.rect.x -= SCREEN_WIDTH;
         camera.target.x -= SCREEN_WIDTH;
         background.parallaxX -= SCREEN_WIDTH;
-        banner.x -= SCREEN_WIDTH;
-        for (int i = 0; i < (int)pillars.size(); i++)
+        
+        for (auto &pillar : pillars)
         {
-            pillars[i].bottom.x -= SCREEN_WIDTH;
-            pillars[i].top.x -= SCREEN_WIDTH;
+            pillar.bottom.x -= SCREEN_WIDTH;
+            pillar.top.x -= SCREEN_WIDTH;
+        }
+
+        for (auto &banner : banners)
+        {
+            banner.x -= SCREEN_WIDTH;
         }
     }
+}
+
+Label Game::CreateBanner(float x, float y)
+{
+    Label banner;
+
+    banner.x = x;
+    banner.y = y;
+    banner.rotation = GetRandomValue(0, 180);
+    banner.fontSize = 40;
+    banner.color = SKYBLUE;
+    banner.shadowColor = BLUE;
+    banner.isVisible = true;
+    banner.rotation = GetRandomValue(0, 180);
+    banner.text = _bannerMessageSource.GetRandom();
+
+    int colorChoice = GetRandomValue(0, 2);
+
+    if (colorChoice == 1)
+    {
+        banner.color = PINK;
+        banner.shadowColor = RED;
+    }
+
+    if (colorChoice == 2)
+    {
+        banner.color = { 0xff, 0xfc, 0xb4, 255 };
+        banner.shadowColor = ORANGE;
+    }
+
+    return banner;
 }
 
 void Game::Initialize()
@@ -185,6 +223,7 @@ void Game::Run() {
     GameState gameState;
     Flappy flappy;
     std::vector<Pillar> pillars;
+    std::vector<Label> banners;
     
     Background background;
 
@@ -218,15 +257,7 @@ void Game::Run() {
     gameOverLabel.color = WHITE;
     gameOverLabel.isVisible = false;
 
-    Label banner;
-    banner.x = 200;
-    banner.y = 100;
-    banner.rotation = GetRandomValue(0, 180);
-    banner.fontSize = 40;
-    banner.color = SKYBLUE;
-    banner.shadowColor = BLUE;
-    banner.isVisible = true;
-    this->RandomizeBanner(banner);
+    banners.push_back(this->CreateBanner(200, 100));
 
     Camera2D camera;
     camera.zoom = 1.0f;
@@ -293,7 +324,7 @@ void Game::Run() {
             }
 
             this->UpdateBackground(background);
-            this->UpdateBanner(banner);
+            this->UpdateBanners(banners);
 
             this->UpdateDeathState(flappy, pillars);
 
@@ -312,7 +343,7 @@ void Game::Run() {
             gameState.deathTimer -= deltaTime;
 
         // Fix for webassembly cam jigering
-        this->ShiftScreen(flappy, camera, pillars, background, banner);
+        this->ShiftScreen(flappy, camera, pillars, background, banners);
 
         // Reset values
         flappy.isJumping = false;
@@ -370,7 +401,9 @@ void Game::Run() {
 
         // Render background and background objects
         backgroundRenderer.Render(background);
-        labelRenderer.Render(banner);
+        
+        for (auto &banner : banners)
+            labelRenderer.Render(banner);
 
         // Render world objects
         pillarRenderer.Render(pillars);

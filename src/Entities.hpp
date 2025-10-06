@@ -1,4 +1,5 @@
 #pragma once
+#include "Constants.hpp"
 #include "raylib.h"
 
 struct GameState

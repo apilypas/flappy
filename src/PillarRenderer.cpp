@@ -9,10 +9,8 @@ void PillarRenderer::Initialize()
 
 void PillarRenderer::Render(std::vector<Pillar> &pillars)
 {
-    for (int i = 0; i < pillars.size(); i++)
+    for (auto &pillar : pillars)
     {
-        auto pillar = pillars[i];
-
         for (float y = pillar.bottom.y; y < pillar.bottom.height; y += 32)
         {
             DrawTexturePro(
