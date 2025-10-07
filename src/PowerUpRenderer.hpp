@@ -1,11 +1,11 @@
 #pragma once
-#include <raylib.h>
 #include "Entities.hpp"
+#include <raylib.h>
 
-class PillarRenderer {
+class PowerUpRenderer {
     Texture2D _texture;
 public:
     void Initialize();
-    void Render(Pillar&);
+    void Render(PowerUp&);
     void Uninitialize();
 };

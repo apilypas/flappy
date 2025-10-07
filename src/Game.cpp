@@ -1,5 +1,6 @@
 #include <cmath>
 #include <ctime>
+#include <raylib.h>
 #include <vector>
 #include "Constants.hpp"
 #include "Game.hpp"
@@ -7,10 +8,11 @@
 #include "PillarRenderer.hpp"
 #include "BackgroundRenderer.hpp"
 #include "LabelRenderer.hpp"
+#include "PowerUpRenderer.hpp"
 #include "SfxPlayer.hpp"
 #include "Entities.hpp"
 
-void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, GameState &gameState)
+void Game::Reset(Flappy &flappy, std::vector<Label> &banners, std::vector<Pillar> &pillars, std::vector<PowerUp> &powerUps, GameState &gameState)
 {
     flappy.rect.x = 100.0f;
     flappy.rect.y = 100.0f;
@@ -21,7 +23,9 @@ void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, GameState &gameSt
     flappy.rotationVelocity = 0.0f;
     flappy.speed = INITIAL_SPEED;
 
+    banners.clear();
     pillars.clear();
+    powerUps.clear();
 
     for (float i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
     {
@@ -32,12 +36,16 @@ void Game::Reset(Flappy &flappy, std::vector<Pillar> &pillars, GameState &gameSt
         if (i < 5)
             y += 50;
         else
-            y = (float)GetRandomValue(120, SCREEN_HEIGHT - 20);
+            y = (float)GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
 
         pillars.push_back(pillar);
     }
 
     gameState.score = 0;
+
+    this->UpdateBanners(banners, 0.0f);
+    this->UpdatePillars(pillars, flappy, 0.0f);
+    this->UpdatePowerUps(powerUps, pillars, 0.0f);
 }
 
 Pillar Game::CreatePillar(float x, float y)
@@ -99,6 +107,56 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scr
     }
 }
 
+void Game::UpdatePowerUps(std::vector<PowerUp> &powerUps, std::vector<Pillar> &pillars, float scrollBy)
+{
+    for (auto it = powerUps.begin(); it != powerUps.end(); )
+    {
+        it->rect.x -= scrollBy;
+
+        // Delete when too far
+        if (it->rect.x < -SCREEN_WIDTH * 2)
+            it = powerUps.erase(it);
+        else
+            it++;
+    }
+    
+    for (auto &pillar : pillars)
+    {
+        if (!pillar.hasPowerUp)
+        {
+            int r = GetRandomValue(0, 10);
+            
+            if (r == 0)
+            {
+                PowerUp powerUp;
+                powerUp.type = PowerUpSlow;
+                powerUp.rect = { 
+                    pillar.bottom.x,
+                    pillar.bottom.y - 40.0f,
+                    32,
+                    32
+                };
+                powerUps.push_back(powerUp);
+            }
+
+            if (r == 1)
+            {
+                PowerUp powerUp;
+                powerUp.type = PowerUpSlow;
+                powerUp.rect = { 
+                    pillar.bottom.x,
+                    pillar.bottom.y - PILLAR_GAP + 8.0f,
+                    32,
+                    32
+                };
+                powerUps.push_back(powerUp);
+            }
+            
+            pillar.hasPowerUp = true;
+        }
+    }
+}
+
 bool Game::HandleScore(std::vector<Pillar> &pillars, Flappy &flappy, GameState &gameState)
 {
     for (auto &pillar : pillars)
@@ -129,6 +187,12 @@ void Game::UpdateBanners(std::vector<Label> &banners, float scrollBy)
         banner.x -= scrollBy / 2.0f;
     }
 
+    if (banners.size() <= 0)
+    {
+        auto banner = CreateBanner(300.0f, 100.0f);
+        banners.push_back(banner);
+    }
+
     auto last = banners[banners.size() - 1];
     if (last.x < SCREEN_WIDTH * 2)
     {
@@ -142,7 +206,7 @@ void Game::UpdateBanners(std::vector<Label> &banners, float scrollBy)
     }
 }
 
-void Game::UpdateDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
+void Game::HandleDeathState(Flappy &flappy, std::vector<Pillar> &pillars)
 {
     Rectangle flappyHitBox = { 
         flappy.rect.x + 4, 
@@ -204,12 +268,33 @@ void Game::Initialize()
     SetTargetFPS(60);
 }
 
-void Game::Run() {
+bool Game::HandlePowerUps(Flappy &flappy, std::vector<PowerUp> &powerUps)
+{
+    bool isTaken = false;
+
+    for (auto it = powerUps.begin(); it != powerUps.end(); )
+    {
+        if (CheckCollisionRecs(flappy.rect, it->rect))
+        {
+            it = powerUps.erase(it);
+            flappy.speed = INITIAL_SPEED;
+            isTaken = true;
+        }
+        else
+            it++;
+    }
+
+    return isTaken;
+}
+
+void Game::Run()
+{
     bool showDebug = false;
     GameState gameState;
     Flappy flappy;
     std::vector<Pillar> pillars;
     std::vector<Label> banners;
+    std::vector<PowerUp> powerUps;
     
     Background background;
 
@@ -243,28 +328,27 @@ void Game::Run() {
     gameOverLabel.color = WHITE;
     gameOverLabel.isVisible = false;
 
-    banners.push_back(this->CreateBanner(300, 100));
-    this->UpdateBanners(banners, 0.0f);
-
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
     camera.target = { flappy.rect.x + 60.0f, (float)SCREEN_HEIGHT / 2.0f };
     camera.offset = { 0.0f, 0.0f };
 
-    this->Reset(flappy, pillars, gameState);
-
     BackgroundRenderer backgroundRenderer;
     FlappyRenderer flappyRenderer;
     PillarRenderer pillarRenderer;
     LabelRenderer labelRenderer;
+    PowerUpRenderer powerUpRenderer;
     SfxPlayer sfxPlayer;
 
     backgroundRenderer.Initialize();
     flappyRenderer.Initialize();
     pillarRenderer.Initialize();
     labelRenderer.Initialize();
+    powerUpRenderer.Initialize();
     sfxPlayer.Initialize();
+
+    this->Reset(flappy, banners, pillars, powerUps, gameState);
 
     while (!WindowShouldClose())
     {
@@ -303,26 +387,30 @@ void Game::Run() {
             if (flappy.isDead)
             {
                 flappy.isDead = false;
-                this->Reset(flappy, pillars, gameState);
+                this->Reset(flappy, banners, pillars, powerUps, gameState);
             }
 
             this->UpdatePhysics(flappy);
             this->UpdatePillars(pillars, flappy, scrollByX);
-            
-            if (this->HandleScore(pillars, flappy, gameState))
-                sfxPlayer.Play(SfxType::Point);
+            this->UpdatePowerUps(powerUps, pillars, scrollByX);
 
             if (flappy.isJumping)
             {
                 flappy.velocity = JUMP_VELOCITY;
                 flappy.rotationVelocity = 45.0f;
-                sfxPlayer.Play(SfxType::Jump);
+                sfxPlayer.Play(SfxType::SfxJump);
             }
 
             this->UpdateBackground(background, scrollByX);
             this->UpdateBanners(banners, scrollByX);
 
-            this->UpdateDeathState(flappy, pillars);
+            this->HandleDeathState(flappy, pillars);
+
+            if (this->HandleScore(pillars, flappy, gameState))
+                sfxPlayer.Play(SfxPoint);
+
+            if (this->HandlePowerUps(flappy, powerUps))
+                sfxPlayer.Play(SfxPowerUp);
 
             // Increase speed over time
             flappy.speed += deltaTime * 2.0f;
@@ -331,7 +419,7 @@ void Game::Run() {
             {
                 gameState.isPaused = true;
                 gameState.deathTimer = 10.0f;
-                sfxPlayer.Play(SfxType::Hit);
+                sfxPlayer.Play(SfxType::SfxHit);
             }
         }
 
@@ -396,7 +484,12 @@ void Game::Run() {
             labelRenderer.Render(banner);
 
         // Render world objects
-        pillarRenderer.Render(pillars);
+        for (auto &pillar : pillars)
+            pillarRenderer.Render(pillar);
+        
+        for (auto &powerUp : powerUps)
+            powerUpRenderer.Render(powerUp);
+        
         flappyRenderer.Render(flappy);
 
         EndMode2D();
@@ -419,6 +512,7 @@ void Game::Run() {
     backgroundRenderer.Uninitialize();
     pillarRenderer.Uninitialize();
     flappyRenderer.Uninitialize();
+    powerUpRenderer.Uninitialize();
     sfxPlayer.Uninitialize();
 }
 

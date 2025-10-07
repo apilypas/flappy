@@ -1,5 +1,3 @@
-#include <vector>
-#include "Constants.hpp"
 #include "PillarRenderer.hpp"
 
 void PillarRenderer::Initialize()
@@ -7,31 +5,28 @@ void PillarRenderer::Initialize()
     _texture = LoadTexture("assets/images/Block.png");
 }
 
-void PillarRenderer::Render(std::vector<Pillar> &pillars)
+void PillarRenderer::Render(Pillar &pillar)
 {
-    for (auto &pillar : pillars)
+    for (float y = pillar.bottom.y; y < pillar.bottom.height; y += 32)
     {
-        for (float y = pillar.bottom.y; y < pillar.bottom.height; y += 32)
-        {
-            DrawTexturePro(
-                _texture,
-                { 0, 0, 32, 32 },
-                { pillar.bottom.x, y, 32, 32},
-                { 0, 0 },
-                0.0f,
-                WHITE);
-        }
+        DrawTexturePro(
+            _texture,
+            { 0, 0, 32, 32 },
+            { pillar.bottom.x, y, 32, 32},
+            { 0, 0 },
+            0.0f,
+            WHITE);
+    }
 
-        for (float y = pillar.top.y; y < pillar.top.y + pillar.top.height - 0.1; y += 32)
-        {
-            DrawTexturePro(
-                _texture,
-                { 0, 0, 32, 32 },
-                { pillar.top.x, y, 32, 32},
-                { 0, 0 },
-                0.0f,
-                WHITE);
-        }
+    for (float y = pillar.top.y; y < pillar.top.y + pillar.top.height - 0.1; y += 32)
+    {
+        DrawTexturePro(
+            _texture,
+            { 0, 0, 32, 32 },
+            { pillar.top.x, y, 32, 32},
+            { 0, 0 },
+            0.0f,
+            WHITE);
     }
 }
 

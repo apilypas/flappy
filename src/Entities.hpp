@@ -25,6 +25,7 @@ struct Pillar
     Rectangle top = { 0, 0, 0, 0 };
     Rectangle bottom = { 0, 0, 0, 0 };
     bool isScored = false;
+    bool hasPowerUp = false;
 };
 
 struct Background
@@ -42,4 +43,15 @@ struct Label
     Color shadowColor = BLACK;
     bool isVisible = false;
     float rotation = 0.0f;
+};
+
+enum PowerUpType
+{
+    PowerUpSlow = 1
+};
+
+struct PowerUp
+{
+    PowerUpType type = PowerUpSlow;
+    Rectangle rect = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
