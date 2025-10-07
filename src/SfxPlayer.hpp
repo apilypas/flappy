@@ -5,7 +5,8 @@ enum class SfxType {
     Jump,
     Hit,
     Point,
-    PowerUp
+    PowerUp,
+    Unlock
 };
 
 class SfxPlayer {
@@ -13,6 +14,7 @@ class SfxPlayer {
     Sound _hitSound;
     Sound _pointSound;
     Sound _powerUpSound;
+    Sound _unlockSound;
     void PlayWithRandomPitch(Sound);
     void Play(Sound);
 public:

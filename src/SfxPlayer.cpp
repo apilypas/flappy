@@ -20,6 +20,7 @@ void SfxPlayer::Initialize()
     _hitSound = LoadSound("assets/audio/Hit.wav");
     _pointSound = LoadSound("assets/audio/Point.wav");
     _powerUpSound = LoadSound("assets/audio/PowerUp.wav");
+    _unlockSound = LoadSound("assets/audio/Unlock.wav");
 }
 
 void SfxPlayer::Play(SfxType sfxType)
@@ -32,6 +33,8 @@ void SfxPlayer::Play(SfxType sfxType)
         Play(_hitSound);
     else if (sfxType == SfxType::PowerUp)
         PlayWithRandomPitch(_powerUpSound);
+    else if (sfxType == SfxType::Unlock)
+        PlayWithRandomPitch(_unlockSound);
 }
 
 void SfxPlayer::Uninitialize()
@@ -40,4 +43,5 @@ void SfxPlayer::Uninitialize()
     UnloadSound(_hitSound);
     UnloadSound(_pointSound);
     UnloadSound(_powerUpSound);
+    UnloadSound(_unlockSound);
 }

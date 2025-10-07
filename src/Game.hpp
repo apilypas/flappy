@@ -51,5 +51,6 @@ private:
     void UpdatePowerUps(float);
     void HandleDeathState();
     bool HandlePowerUps();
+    bool HandleDoorUnlocks();
     Label CreateBanner(float x, float y);
 };

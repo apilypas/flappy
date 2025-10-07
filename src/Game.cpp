@@ -6,6 +6,7 @@
 #include "Constants.hpp"
 #include "Game.hpp"
 #include "Entities.hpp"
+#include "SfxPlayer.hpp"
 
 void Game::Initialize()
 {
@@ -108,6 +109,9 @@ void Game::Run()
 
             if (this->HandlePowerUps())
                 _sfxPlayer.Play(SfxType::PowerUp);
+
+            if (this->HandleDoorUnlocks())
+                _sfxPlayer.Play(SfxType::Unlock);
 
             // Increase speed over time
             _flappy.speed += deltaTime * 4.0f;
@@ -284,6 +288,19 @@ Pillar Game::CreatePillar(float x, float y)
     pillar.top.width = PILLAR_WIDTH;
     pillar.top.height = PILLAR_HEIGHT;
 
+    if (_nextPillarId > 10 && GetRandomValue(0, 1) == 0)
+    {
+        pillar.door.x = x;
+        pillar.door.y = y - PILLAR_GAP;
+        pillar.door.width = PILLAR_WIDTH;
+        pillar.door.height = PILLAR_GAP;
+
+        pillar.lockCenter = { x - 48.0f, y + (float)GetRandomValue(0, -PILLAR_GAP) };
+        pillar.lockRadius = 16.0f;
+
+        pillar.isLocked = true;
+    }
+
     pillar.isScored = false;
 
     TraceLog(LOG_INFO, "Created pillar: id=%d", pillar.id);
@@ -293,15 +310,17 @@ Pillar Game::CreatePillar(float x, float y)
 
 void Game::UpdatePhysics()
 {
+    float deltaTime = GetFrameTime();
+
     // Apply gravity
-    _flappy.velocity -= 0.1f;
+    _flappy.velocity -= 8.9f * deltaTime;
 
     // Calculate y
     _flappy.rect.y -= _flappy.velocity;
 
     if (_flappy.rotationVelocity > 0)
     {
-        _flappy.rotationVelocity -= 1.0f;
+        _flappy.rotationVelocity -= 60.0f * deltaTime;
         _flappy.rotation += _flappy.rotationVelocity;
         if (_flappy.rotation > 360.0f)
             _flappy.rotation -= 360.0f;
@@ -333,6 +352,8 @@ void Game::UpdatePillars(float scrollBy)
             {
                 pillar.bottom.y -= pillar.slidingSpeed * deltaTime;
                 pillar.top.y -= pillar.slidingSpeed * deltaTime;
+                pillar.door.y -= pillar.slidingSpeed * deltaTime;
+                pillar.lockCenter.y -= pillar.slidingSpeed * deltaTime;
                 if (pillar.bottom.y <= 20.0f + PILLAR_GAP)
                     pillar.isSlidingUp = false;
             }
@@ -340,16 +361,21 @@ void Game::UpdatePillars(float scrollBy)
             {
                 pillar.bottom.y += pillar.slidingSpeed * deltaTime;
                 pillar.top.y += pillar.slidingSpeed * deltaTime;
+                pillar.door.y += pillar.slidingSpeed * deltaTime;
+                pillar.lockCenter.y += pillar.slidingSpeed * deltaTime;
                 if (pillar.bottom.y >= SCREEN_HEIGHT - 20.0f)
                     pillar.isSlidingUp = true;
             }
         }
     }
 
+    // Scroll pillars
     for (auto &pillar : _pillars)
     {
         pillar.top.x -= scrollBy;
         pillar.bottom.x -= scrollBy;
+        pillar.door.x -= scrollBy;
+        pillar.lockCenter.x -= scrollBy;
     }
 }
 
@@ -382,6 +408,13 @@ void Game::UpdatePowerUps(float scrollBy)
                     32,
                     32
                 };
+
+                if (pillar.isLocked)
+                {
+                    powerUp.rect.x = pillar.bottom.x + PILLAR_WIDTH + 16.0f;
+                    powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
+                }
+
                 _powerUps.push_back(powerUp);
             }
 
@@ -395,6 +428,13 @@ void Game::UpdatePowerUps(float scrollBy)
                     32,
                     32
                 };
+
+                if (pillar.isLocked)
+                {
+                    powerUp.rect.x = pillar.bottom.x + PILLAR_WIDTH + 16.0f;
+                    powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
+                }
+
                 _powerUps.push_back(powerUp);
             }
 
@@ -492,6 +532,7 @@ void Game::HandleDeathState()
         _flappy.isDead = 
             CheckCollisionRecs(flappyHitBox, pillar.bottom)
             || CheckCollisionRecs(flappyHitBox, pillar.top)
+            || (pillar.door.width > 0.01f && pillar.door.height >= 0.01f && pillar.isLocked && CheckCollisionRecs(flappyHitBox, pillar.door))
             || _flappy.rect.y > SCREEN_HEIGHT * 4;
         
         if (_flappy.isDead)
@@ -555,4 +596,32 @@ bool Game::HandlePowerUps()
     }
 
     return isTaken;
+}
+
+bool Game::HandleDoorUnlocks()
+{
+    bool isUnlocked = false;
+
+    // Handle door locks
+    for (auto &pillar : _pillars)
+    {
+        if (pillar.door.height > 0.01f && pillar.door.width > 0.01f)
+        {
+            Rectangle rect = { 
+                _flappy.rect.x + 4,
+                _flappy.rect.y + 4,
+                _flappy.rect.width - 8,
+                _flappy.rect.height - 8
+            };
+            
+            if (pillar.isLocked && CheckCollisionCircleRec(pillar.lockCenter, pillar.lockRadius, rect))
+            {
+                // Open door
+                isUnlocked = true;
+                pillar.isLocked = false;
+            }
+        }
+    }
+
+    return isUnlocked;
 }

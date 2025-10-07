@@ -32,6 +32,10 @@ struct Pillar
     PillarType type = PillarType::Normal;
     Rectangle top = { 0, 0, 0, 0 };
     Rectangle bottom = { 0, 0, 0, 0 };
+    Rectangle door = { 0, 0, 0, 0 };
+    Vector2 lockCenter = { 0, 0};
+    float lockRadius = 0.0f;
+    bool isLocked = false;
     bool isScored = false;
     bool hasPowerUp = false;
     bool isSlidingUp = false;
