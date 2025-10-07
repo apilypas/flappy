@@ -1,11 +1,11 @@
 #pragma once
 #include <raylib.h>
 
-enum SfxType {
-    SfxJump = 1,
-    SfxHit,
-    SfxPoint,
-    SfxPowerUp
+enum class SfxType {
+    Jump,
+    Hit,
+    Point,
+    PowerUp
 };
 
 class SfxPlayer {

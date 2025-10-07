@@ -20,12 +20,22 @@ struct Flappy
     float speed = INITIAL_SPEED;
 };
 
+enum class PillarType
+{
+    Normal,
+    Sliding
+};
+
 struct Pillar
 {
+    int id = 0;
+    PillarType type = PillarType::Normal;
     Rectangle top = { 0, 0, 0, 0 };
     Rectangle bottom = { 0, 0, 0, 0 };
     bool isScored = false;
     bool hasPowerUp = false;
+    bool isSlidingUp = false;
+    float slidingSpeed = 60.0f;
 };
 
 struct Background
@@ -45,13 +55,13 @@ struct Label
     float rotation = 0.0f;
 };
 
-enum PowerUpType
+enum class PowerUpType
 {
-    PowerUpSlow = 1
+    Slow
 };
 
 struct PowerUp
 {
-    PowerUpType type = PowerUpSlow;
+    PowerUpType type = PowerUpType::Slow;
     Rectangle rect = { 0.0f, 0.0f, 0.0f, 0.0f };
 };

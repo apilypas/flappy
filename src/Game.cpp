@@ -50,7 +50,19 @@ void Game::Reset(Flappy &flappy, std::vector<Label> &banners, std::vector<Pillar
 
 Pillar Game::CreatePillar(float x, float y)
 {
+    static int nextPillarId = 1;
+
     Pillar pillar;
+
+    pillar.id = nextPillarId++;
+    pillar.type = PillarType::Normal;
+
+    if (nextPillarId % 5 == 0)
+    {
+        pillar.type = PillarType::Sliding;
+        pillar.isSlidingUp = (bool)GetRandomValue(0, 1);
+        pillar.slidingSpeed = 60.0f + (float)GetRandomValue(-20, 20);
+    }
 
     pillar.bottom.x = x;
     pillar.bottom.y = y;
@@ -63,6 +75,8 @@ Pillar Game::CreatePillar(float x, float y)
     pillar.top.height = PILLAR_HEIGHT;
 
     pillar.isScored = false;
+
+    TraceLog(LOG_INFO, "Created pillar: id=%d", pillar.id);
 
     return pillar;
 }
@@ -87,6 +101,7 @@ void Game::UpdatePhysics(Flappy &flappy)
 void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scrollBy)
 {
     bool doShift = pillars[0].bottom.x < flappy.rect.x - (160 * 7);
+    float deltaTime = GetFrameTime();
 
     if (doShift)
     {
@@ -98,6 +113,27 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scr
         auto pillar = CreatePillar(x, y);
         
         pillars.push_back(pillar);
+    }
+
+    for (auto &pillar: pillars)
+    {
+        if (pillar.type == PillarType::Sliding)
+        {
+            if (pillar.isSlidingUp)
+            {
+                pillar.bottom.y -= pillar.slidingSpeed * deltaTime;
+                pillar.top.y -= pillar.slidingSpeed * deltaTime;
+                if (pillar.bottom.y <= 20.0f + PILLAR_GAP)
+                    pillar.isSlidingUp = false;
+            }
+            else
+            {
+                pillar.bottom.y += pillar.slidingSpeed * deltaTime;
+                pillar.top.y += pillar.slidingSpeed * deltaTime;
+                if (pillar.bottom.y >= SCREEN_HEIGHT - 20.0f)
+                    pillar.isSlidingUp = true;
+            }
+        }
     }
 
     for (auto &pillar : pillars)
@@ -126,10 +162,10 @@ void Game::UpdatePowerUps(std::vector<PowerUp> &powerUps, std::vector<Pillar> &p
         {
             int r = GetRandomValue(0, 10);
             
-            if (r == 0)
+            if (r == 0 && pillar.type == PillarType::Normal)
             {
                 PowerUp powerUp;
-                powerUp.type = PowerUpSlow;
+                powerUp.type = PowerUpType::Slow;
                 powerUp.rect = { 
                     pillar.bottom.x,
                     pillar.bottom.y - 40.0f,
@@ -139,10 +175,10 @@ void Game::UpdatePowerUps(std::vector<PowerUp> &powerUps, std::vector<Pillar> &p
                 powerUps.push_back(powerUp);
             }
 
-            if (r == 1)
+            if (r == 1 && pillar.type == PillarType::Normal)
             {
                 PowerUp powerUp;
-                powerUp.type = PowerUpSlow;
+                powerUp.type = PowerUpType::Slow;
                 powerUp.rect = { 
                     pillar.bottom.x,
                     pillar.bottom.y - PILLAR_GAP + 8.0f,
@@ -398,7 +434,7 @@ void Game::Run()
             {
                 flappy.velocity = JUMP_VELOCITY;
                 flappy.rotationVelocity = 45.0f;
-                sfxPlayer.Play(SfxType::SfxJump);
+                sfxPlayer.Play(SfxType::Jump);
             }
 
             this->UpdateBackground(background, scrollByX);
@@ -407,10 +443,10 @@ void Game::Run()
             this->HandleDeathState(flappy, pillars);
 
             if (this->HandleScore(pillars, flappy, gameState))
-                sfxPlayer.Play(SfxPoint);
+                sfxPlayer.Play(SfxType::Point);
 
             if (this->HandlePowerUps(flappy, powerUps))
-                sfxPlayer.Play(SfxPowerUp);
+                sfxPlayer.Play(SfxType::PowerUp);
 
             // Increase speed over time
             flappy.speed += deltaTime * 2.0f;
@@ -419,7 +455,7 @@ void Game::Run()
             {
                 gameState.isPaused = true;
                 gameState.deathTimer = 10.0f;
-                sfxPlayer.Play(SfxType::SfxHit);
+                sfxPlayer.Play(SfxType::Hit);
             }
         }
 

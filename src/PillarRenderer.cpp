@@ -7,22 +7,38 @@ void PillarRenderer::Initialize()
 
 void PillarRenderer::Render(Pillar &pillar)
 {
-    for (float y = pillar.bottom.y; y < pillar.bottom.height; y += 32)
+    DrawTexturePro(
+        _texture,
+        { 16, 16, 32, 32 },
+        { pillar.bottom.x, pillar.bottom.y, 32, 32},
+        { 0, 0 },
+        0.0f,
+        WHITE);
+
+    for (float y = pillar.bottom.y + 32; y < pillar.bottom.height; y += 32)
     {
         DrawTexturePro(
             _texture,
-            { 0, 0, 32, 32 },
+            { 16, 48, 32, 32 },
             { pillar.bottom.x, y, 32, 32},
             { 0, 0 },
             0.0f,
             WHITE);
     }
 
-    for (float y = pillar.top.y; y < pillar.top.y + pillar.top.height - 0.1; y += 32)
+    DrawTexturePro(
+            _texture,
+            { 16, 80, 32, 32 },
+            { pillar.top.x, pillar.top.y + pillar.top.height - 32, 32, 32},
+            { 0, 0 },
+            0.0f,
+            WHITE);
+
+    for (float y = pillar.top.y; y < pillar.top.y + pillar.top.height - 32; y += 32)
     {
         DrawTexturePro(
             _texture,
-            { 0, 0, 32, 32 },
+            { 16, 48, 32, 32 },
             { pillar.top.x, y, 32, 32},
             { 0, 0 },
             0.0f,

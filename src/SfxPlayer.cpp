@@ -24,13 +24,13 @@ void SfxPlayer::Initialize()
 
 void SfxPlayer::Play(SfxType sfxType)
 {
-    if (sfxType == SfxType::SfxJump)
+    if (sfxType == SfxType::Jump)
         PlayWithRandomPitch(_jumpSound);
-    else if (sfxType == SfxType::SfxPoint)
+    else if (sfxType == SfxType::Point)
         PlayWithRandomPitch(_pointSound);
-    else if (sfxType == SfxType::SfxHit)
+    else if (sfxType == SfxType::Hit)
         Play(_hitSound);
-    else if (sfxType == SfxType::SfxPowerUp)
+    else if (sfxType == SfxType::PowerUp)
         PlayWithRandomPitch(_powerUpSound);
 }
 
