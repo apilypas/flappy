@@ -396,7 +396,7 @@ void Game::UpdatePowerUps(float scrollBy)
     {
         if (!pillar.hasPowerUp)
         {
-            int r = GetRandomValue(0, 5);
+            int r = GetRandomValue(0, 3);
             
             if (r == 0)
             {
@@ -404,7 +404,7 @@ void Game::UpdatePowerUps(float scrollBy)
                 powerUp.type = PowerUpType::Slow;
                 powerUp.rect = { 
                     pillar.bottom.x,
-                    pillar.bottom.y - 40.0f,
+                    pillar.bottom.y - (float)GetRandomValue(40, PILLAR_GAP + 8),
                     32,
                     32
                 };
@@ -421,26 +421,6 @@ void Game::UpdatePowerUps(float scrollBy)
             if (r == 1)
             {
                 PowerUp powerUp;
-                powerUp.type = PowerUpType::Slow;
-                powerUp.rect = { 
-                    pillar.bottom.x,
-                    pillar.bottom.y - PILLAR_GAP + 8.0f,
-                    32,
-                    32
-                };
-
-                if (pillar.isLocked)
-                {
-                    powerUp.rect.x = pillar.bottom.x + PILLAR_WIDTH + 16.0f;
-                    powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
-                }
-
-                _powerUps.push_back(powerUp);
-            }
-
-            if (r == 2)
-            {
-                PowerUp powerUp;
                 powerUp.type = PowerUpType::Points;
                 powerUp.rect = { 
                     pillar.bottom.x + (float)GetRandomValue(60, PILLAR_SPACE - 60),
@@ -451,7 +431,7 @@ void Game::UpdatePowerUps(float scrollBy)
                 _powerUps.push_back(powerUp);
             }
 
-            if (r == 3)
+            if (r == 2)
             {
                 PowerUp powerUp;
                 powerUp.type = PowerUpType::Points;
