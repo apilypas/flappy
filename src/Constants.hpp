@@ -1,7 +1,7 @@
 #pragma once
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 360
 #define TOTAL_PILLARS 15
 #define PILLAR_WIDTH 30
 #define PILLAR_HEIGHT 960

@@ -15,7 +15,7 @@
 void Game::Reset(Flappy &flappy, std::vector<Label> &banners, std::vector<Pillar> &pillars, std::vector<PowerUp> &powerUps, GameState &gameState)
 {
     flappy.rect.x = 100.0f;
-    flappy.rect.y = 100.0f;
+    flappy.rect.y = SCREEN_HEIGHT / 2.0f - 16.0f;
     flappy.rect.width = 32.0f;
     flappy.rect.height = 32.0f;
     flappy.velocity = 0.0f;
@@ -27,13 +27,13 @@ void Game::Reset(Flappy &flappy, std::vector<Label> &banners, std::vector<Pillar
     pillars.clear();
     powerUps.clear();
 
-    for (float i = 0, x = 300, y = 160; i < TOTAL_PILLARS; i++)
+    for (float i = 0, x = 300, y = 20 + PILLAR_GAP; i < TOTAL_PILLARS; i++)
     {
         auto pillar = CreatePillar(x, y);
 
         x += PILLAR_SPACE;
 
-        if (i < 5)
+        if (i < 3)
             y += 50;
         else
             y = (float)GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
@@ -93,7 +93,7 @@ void Game::UpdatePillars(std::vector<Pillar> &pillars, Flappy &flappy, float scr
         pillars.erase(pillars.begin());
 
         float x = pillars[pillars.size() - 1].top.x + PILLAR_SPACE;
-        float y = (float)GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
+        float y = (float)GetRandomValue(40 + PILLAR_GAP, SCREEN_HEIGHT - 40);
         
         auto pillar = CreatePillar(x, y);
         
@@ -331,7 +331,7 @@ void Game::Run()
     Camera2D camera;
     camera.zoom = 1.0f;
     camera.rotation = 0.0f;
-    camera.target = { flappy.rect.x + 60.0f, (float)SCREEN_HEIGHT / 2.0f };
+    camera.target = { 0.0f, 0.0f };
     camera.offset = { 0.0f, 0.0f };
 
     BackgroundRenderer backgroundRenderer;
@@ -445,9 +445,10 @@ void Game::Run()
 
         camera.zoom = scale;
 
+        // Adjust offset to correctly fit everything in screen
         camera.offset = {
-            100.0f + ((float)screenWidth - SCREEN_WIDTH * scale) / 2.0f,
-            (SCREEN_HEIGHT * scale) / 2.0f + ((float)screenHeight - SCREEN_HEIGHT * scale) / 2.0f
+            ((float)screenWidth - (float)SCREEN_WIDTH * scale) / 2.0f,
+            ((float)screenHeight - (float)SCREEN_HEIGHT * scale) / 2.0f
         };
 
         // Update labels
