@@ -7,28 +7,34 @@
 #include "BackgroundRenderer.hpp"
 #include "LabelRenderer.hpp"
 #include "PowerUpRenderer.hpp"
+#include "GameBannerRenderer.hpp"
 #include "SfxPlayer.hpp"
 
 class Game {
     bool showDebug;
-    BannerMessageSource _bannerMessageSource;
     int _nextPillarId = 0;
+
+    BannerMessageSource _bannerMessageSource;
+
+    Camera2D _camera;
+    
     GameState _gameState;
     Flappy _flappy;
     std::vector<Pillar> _pillars;
     std::vector<Label> _banners;
     std::vector<PowerUp> _powerUps;
     Background _background;
+
+    GameBanner _gameBanner;
     Label _scoreLabel;
-    Label _deadLabel;
-    Label _pauseLabel;
-    Label _gameOverLabel;
-    Camera2D _camera;
+    
     BackgroundRenderer _backgroundRenderer;
     FlappyRenderer _flappyRenderer;
     PillarRenderer _pillarRenderer;
     LabelRenderer _labelRenderer;
     PowerUpRenderer _powerUpRenderer;
+    GameBannerRenderer _gameBannerRenderer;
+
     SfxPlayer _sfxPlayer;
 public:
     void Initialize();

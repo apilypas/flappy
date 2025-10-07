@@ -21,31 +21,16 @@ void Game::Run()
 {
     showDebug = false;
 
+    _gameBanner.text = "Press SPACE to start";
+    _gameBanner.bannerText = "Flappy Oik";
+    _gameBanner.authorText = "by g1ngercat.itch.io";
+    _gameBanner.isVisible = true;
+
     _scoreLabel.x = 10;
     _scoreLabel.y = 10;
     _scoreLabel.fontSize = 20;
     _scoreLabel.color = YELLOW;
     _scoreLabel.isVisible = true;
-
-    _deadLabel.x = 200;
-    _deadLabel.y = 200;
-    _deadLabel.fontSize = 40;
-    _deadLabel.color = RED;
-    _deadLabel.isVisible = false;
-
-    _pauseLabel.text = "Press [SPACE] to unpause";
-    _pauseLabel.x = 200;
-    _pauseLabel.y = 200;
-    _pauseLabel.fontSize = 30;
-    _pauseLabel.color = WHITE;
-    _pauseLabel.isVisible = true;
-
-    _gameOverLabel.text = "Press [SPACE] to restart";
-    _gameOverLabel.x = 200;
-    _gameOverLabel.y = 200;
-    _gameOverLabel.fontSize = 30;
-    _gameOverLabel.color = WHITE;
-    _gameOverLabel.isVisible = false;
 
     _camera.zoom = 1.0f;
     _camera.rotation = 0.0f;
@@ -58,6 +43,7 @@ void Game::Run()
     _labelRenderer.Initialize();
     _powerUpRenderer.Initialize();
     _sfxPlayer.Initialize();
+    _gameBannerRenderer.Initialize();
 
     this->Reset();
 
@@ -167,21 +153,21 @@ void Game::Run()
         _scoreLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_scoreLabel.text, (int)_scoreLabel.fontSize) / 2;
         _scoreLabel.text = TextFormat("Score: %d", _gameState.score);
 
-        _deadLabel.fontSize = 40.0f * scale;
-        _deadLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_deadLabel.text, (int)_deadLabel.fontSize) / 2;
-        _deadLabel.y = (float)screenHeight / 2.0f;
-        _deadLabel.isVisible = _gameState.deathTimer > 0;
-        _deadLabel.text = TextFormat("You are DEAD!!! (%d)", (int)_gameState.deathTimer);
+        if (_flappy.isDead)
+        {
+            if (_gameState.deathTimer > 0.01f)
+                _gameBanner.text = TextFormat("Game is OVER! (%d)", (int)_gameState.deathTimer);
+            else
+                _gameBanner.text = "Press SPACE to restart";
+        }
+        else if (_gameState.isPaused)
+        {
+            _gameBanner.text = "Press SPACE to unpause";
+        }
 
-        _pauseLabel.fontSize = 30.0f * scale;
-        _pauseLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_pauseLabel.text, (int)_pauseLabel.fontSize) / 2;
-        _pauseLabel.y = (float)screenHeight / 2.0f;
-        _pauseLabel.isVisible = _gameState.isPaused && !_flappy.isDead;
-
-        _gameOverLabel.fontSize = 30.0f * scale;
-        _gameOverLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_gameOverLabel.text, (int)_gameOverLabel.fontSize) / 2;
-        _gameOverLabel.y = (float)screenHeight / 2.0f;
-        _gameOverLabel.isVisible = _gameState.isPaused && _flappy.isDead && _gameState.deathTimer <= 0;
+        _gameBanner.scale = scale;
+        _gameBanner.isVisible = _gameState.isPaused;
+        _gameBanner.color = _gameState.deathTimer > 0.01f ? ORANGE : WHITE;
 
         BeginDrawing();
 
@@ -208,9 +194,7 @@ void Game::Run()
 
         // Render HUD
         _labelRenderer.Render(_scoreLabel);
-        _labelRenderer.Render(_deadLabel);
-        _labelRenderer.Render(_pauseLabel);
-        _labelRenderer.Render(_gameOverLabel);
+        _gameBannerRenderer.Render(_gameBanner);
 
         if (showDebug)
         {
@@ -226,6 +210,7 @@ void Game::Run()
     _flappyRenderer.Uninitialize();
     _powerUpRenderer.Uninitialize();
     _sfxPlayer.Uninitialize();
+    _gameBannerRenderer.Uninitialize();
 }
 
 void Game::Uninitialize()

@@ -66,3 +66,13 @@ struct PowerUp
     PowerUpType type = PowerUpType::Slow;
     Rectangle rect = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
+
+struct GameBanner
+{
+    const char *text = "";
+    const char *bannerText = "";
+    const char *authorText = "";
+    float scale = 1.0f;
+    Color color = WHITE;
+    bool isVisible = false;
+};

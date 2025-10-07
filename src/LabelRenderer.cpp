@@ -3,7 +3,7 @@
 
 void LabelRenderer::Initialize()
 {
-    _font = LoadFontEx("assets/fonts/golem-script.ttf", 64, 0, 0);
+    _font = LoadFontEx("assets/fonts/golem-script.ttf",  40*4, 0, 0);
 }
 
 void LabelRenderer::Render(Label &label)
