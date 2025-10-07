@@ -57,7 +57,8 @@ struct Label
 
 enum class PowerUpType
 {
-    Slow
+    Slow,
+    Points
 };
 
 struct PowerUp

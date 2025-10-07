@@ -2,22 +2,48 @@
 #include <vector>
 #include "Entities.hpp"
 #include "BannerMessageSource.hpp"
+#include "FlappyRenderer.hpp"
+#include "PillarRenderer.hpp"
+#include "BackgroundRenderer.hpp"
+#include "LabelRenderer.hpp"
+#include "PowerUpRenderer.hpp"
+#include "SfxPlayer.hpp"
 
 class Game {
+    bool showDebug;
     BannerMessageSource _bannerMessageSource;
-    void Reset(Flappy&, std::vector<Label>&, std::vector<Pillar>&, std::vector<PowerUp>&, GameState&);
-    Pillar CreatePillar(float x, float y);
-    void UpdatePhysics(Flappy&);
-    void UpdatePillars(std::vector<Pillar>&, Flappy&, float);
-    bool HandleScore(std::vector<Pillar>&, Flappy&, GameState&);
-    void UpdateBackground(Background&, float);
-    void UpdateBanners(std::vector<Label>&, float);
-    void UpdatePowerUps(std::vector<PowerUp>&, std::vector<Pillar>&, float);
-    void HandleDeathState(Flappy&, std::vector<Pillar>&);
-    bool HandlePowerUps(Flappy&, std::vector<PowerUp>&);
-    Label CreateBanner(float x, float y);
+    int _nextPillarId = 0;
+    GameState _gameState;
+    Flappy _flappy;
+    std::vector<Pillar> _pillars;
+    std::vector<Label> _banners;
+    std::vector<PowerUp> _powerUps;
+    Background _background;
+    Label _scoreLabel;
+    Label _deadLabel;
+    Label _pauseLabel;
+    Label _gameOverLabel;
+    Camera2D _camera;
+    BackgroundRenderer _backgroundRenderer;
+    FlappyRenderer _flappyRenderer;
+    PillarRenderer _pillarRenderer;
+    LabelRenderer _labelRenderer;
+    PowerUpRenderer _powerUpRenderer;
+    SfxPlayer _sfxPlayer;
 public:
     void Initialize();
     void Run();
     void Uninitialize();
+private:
+    void Reset();
+    Pillar CreatePillar(float x, float y);
+    void UpdatePhysics();
+    void UpdatePillars(float);
+    bool HandleScore();
+    void UpdateBackground(float);
+    void UpdateBanners(float);
+    void UpdatePowerUps(float);
+    void HandleDeathState();
+    bool HandlePowerUps();
+    Label CreateBanner(float x, float y);
 };
