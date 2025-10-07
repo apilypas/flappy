@@ -295,7 +295,7 @@ Pillar Game::CreatePillar(float x, float y)
         pillar.door.width = PILLAR_WIDTH;
         pillar.door.height = PILLAR_GAP;
 
-        pillar.lockCenter = { x - 48.0f, y + (float)GetRandomValue(0, -PILLAR_GAP) };
+        pillar.lockCenter = { x - 48.0f, y + (float)GetRandomValue(0, -PILLAR_GAP + 32.0f) };
         pillar.lockRadius = 16.0f;
 
         pillar.isLocked = true;
@@ -396,9 +396,9 @@ void Game::UpdatePowerUps(float scrollBy)
     {
         if (!pillar.hasPowerUp)
         {
-            int r = GetRandomValue(0, 3);
+            int r = GetRandomValue(0, 2);
             
-            if (r == 0)
+            if (r == 0 || (r == 1 && pillar.isLocked))
             {
                 PowerUp powerUp;
                 powerUp.type = PowerUpType::Slow;
@@ -417,27 +417,14 @@ void Game::UpdatePowerUps(float scrollBy)
 
                 _powerUps.push_back(powerUp);
             }
-
-            if (r == 1)
+            else if (r == 1)
             {
+                bool isOnTop = GetRandomValue(0, 1);
                 PowerUp powerUp;
                 powerUp.type = PowerUpType::Points;
                 powerUp.rect = { 
                     pillar.bottom.x + (float)GetRandomValue(60, PILLAR_SPACE - 60),
-                    20.0f,
-                    32,
-                    32
-                };
-                _powerUps.push_back(powerUp);
-            }
-
-            if (r == 2)
-            {
-                PowerUp powerUp;
-                powerUp.type = PowerUpType::Points;
-                powerUp.rect = { 
-                    pillar.bottom.x + (float)GetRandomValue(60, PILLAR_SPACE - 60),
-                    SCREEN_HEIGHT - 32.0f - 20.0f,
+                    isOnTop ? 20.0f : SCREEN_HEIGHT - 32.0f - 20.0f,
                     32,
                     32
                 };
