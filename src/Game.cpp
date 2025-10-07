@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <raylib.h>
@@ -123,7 +124,7 @@ void Game::Run()
                 _sfxPlayer.Play(SfxType::PowerUp);
 
             // Increase speed over time
-            _flappy.speed += deltaTime * 2.0f;
+            _flappy.speed += deltaTime * 4.0f;
 
             if (_flappy.isDead)
             {
@@ -279,7 +280,8 @@ Pillar Game::CreatePillar(float x, float y)
     pillar.id = _nextPillarId++;
     pillar.type = PillarType::Normal;
 
-    if (_nextPillarId % 5 == 0)
+    if ((_nextPillarId <= 20 && _nextPillarId % 5 == 0)
+        || (_nextPillarId > 20 && GetRandomValue(0, 2) == 0))
     {
         pillar.type = PillarType::Sliding;
         pillar.isSlidingUp = (bool)GetRandomValue(0, 1);
@@ -553,7 +555,7 @@ bool Game::HandlePowerUps()
         {
             if (it->type == PowerUpType::Slow)
             {
-                _flappy.speed = INITIAL_SPEED;
+                _flappy.speed = std::max(_flappy.speed - _flappy.speed * 0.2f, 10.0f);
             }
             else if (it->type == PowerUpType::Points)
             {
