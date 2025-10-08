@@ -1,4 +1,4 @@
-#include "raylib.h"
+#include <raylib.h>
 #include "BannerMessageSource.hpp"
 
 const char* messages[] = {
@@ -17,7 +17,14 @@ const char* messages[] = {
     "Bomb Around",
     "LINIX!!!",
     "Bananen!!!",
-    "Motivation Liquid"
+    "Motivation Liquid",
+    "F*CK THE ADS!",
+    "Nuts!",
+    "Horsen",
+    "deez",
+    "wazzaaa",
+    "booyashaka",
+    "!sfx"
 };
 
 const char *BannerMessageSource::GetRandom()
