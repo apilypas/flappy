@@ -404,14 +404,16 @@ void Game::UpdatePowerUps(float scrollBy)
                 powerUp.type = PowerUpType::Slow;
                 powerUp.rect = { 
                     pillar.bottom.x,
-                    pillar.bottom.y - (float)GetRandomValue(40, PILLAR_GAP + 8),
+                    (float)GetRandomValue(
+                        (int)pillar.top.y + (int)pillar.top.height, 
+                        (int)pillar.bottom.y - (int)40.0f),
                     32,
                     32
                 };
 
                 if (pillar.isLocked)
                 {
-                    powerUp.rect.x = pillar.bottom.x + PILLAR_WIDTH + 16.0f;
+                    powerUp.rect.x = pillar.bottom.x + pillar.bottom.width + 16.0f;
                     powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
                 }
 
