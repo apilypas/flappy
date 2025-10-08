@@ -30,7 +30,7 @@ void Game::Run()
     _scoreLabel.x = 10;
     _scoreLabel.y = 10;
     _scoreLabel.fontSize = 20;
-    _scoreLabel.color = YELLOW;
+    _scoreLabel.color = { 0xFF, 0xC9, 0x00, 0xFF };
     _scoreLabel.isVisible = true;
 
     _camera.zoom = 1.0f;
@@ -173,7 +173,9 @@ void Game::Run()
 
         _gameBanner.scale = scale;
         _gameBanner.isVisible = _gameState.isPaused;
-        _gameBanner.color = _gameState.deathTimer > 0.01f ? ORANGE : WHITE;
+        _gameBanner.color = WHITE;
+        if (_gameState.deathTimer > 0.01f)
+            _gameBanner.color = { 0xFF, 0x42, 0x31, 0xFF };
 
         BeginDrawing();
 
@@ -539,8 +541,8 @@ Label Game::CreateBanner(float x, float y)
     banner.y = y;
     banner.rotation = (float)GetRandomValue(0, 180);
     banner.fontSize = 40;
-    banner.color = SKYBLUE;
-    banner.shadowColor = BLUE;
+    banner.color = { 0x4C, 0x85, 0xE3, 0xFF };
+    banner.shadowColor = { 0x19, 0x50, 0xA7, 0xFF };
     banner.isVisible = true;
     banner.rotation = (float)GetRandomValue(0, 180);
     banner.text = _bannerMessageSource.GetRandom();
@@ -549,14 +551,14 @@ Label Game::CreateBanner(float x, float y)
 
     if (colorChoice == 1)
     {
-        banner.color = PINK;
-        banner.shadowColor = RED;
+        banner.color = { 0xDF, 0x46, 0x38, 0xFF };
+        banner.shadowColor = { 0xAB, 0x26, 0x1A, 0xFF };
     }
 
     if (colorChoice == 2)
     {
-        banner.color = { 0xff, 0xfc, 0xb4, 255 };
-        banner.shadowColor = ORANGE;
+        banner.color = { 0xDF, 0xC0, 0x4D, 0xFF };
+        banner.shadowColor = { 0xBB, 0x9D, 0x2D, 0xFF };
     }
 
     return banner;

@@ -1,8 +1,4 @@
-#include <cmath>
-#include <ctime>
-#include "raylib.h"
 #include "Game.hpp"
-
 
 int main(void)
 {

@@ -33,7 +33,7 @@ void GameBannerRenderer::Render(GameBanner &b)
         80 * b.scale,
         box,
         { 0, -100.0f * b.scale },
-        YELLOW);
+        { 0xFF, 0xC9, 0x00, 0xFF });
     
     this->DrawText(
         b.authorText,

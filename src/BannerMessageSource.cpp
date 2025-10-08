@@ -24,7 +24,8 @@ const char* messages[] = {
     "deez",
     "wazzaaa",
     "booyashaka",
-    "!sfx"
+    "!sfx",
+    "Beer!L"
 };
 
 const char *BannerMessageSource::GetRandom()
