@@ -25,7 +25,7 @@ void GameBannerRenderer::Render(GameBanner &b)
         box,
         { 0, 0 },
         0.0f,
-        { 0x00, 0x00, 0x00, 0xAA }
+        { 0x00, 0x00, 0x00, 0xCC }
     );
 
     this->DrawText(
@@ -40,7 +40,14 @@ void GameBannerRenderer::Render(GameBanner &b)
         20 * b.scale,
         box,
         { 0, 40.0f * b.scale },
-        WHITE);
+        { 0xEF, 0xD9, 0x85, 0xFF });
+    
+    this->DrawText(
+        b.hiScoreText,
+        20 * b.scale,
+        box,
+        { 0, -260.0f * b.scale },
+        { 0xFB, 0x8C, 0x81, 0xFF });
 
     this->DrawText(
         b.text,

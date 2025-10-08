@@ -118,6 +118,10 @@ void Game::Run()
             // Increase speed over time
             _flappy.speed += deltaTime * 4.0f;
 
+            // Update hi score
+            if (_gameState.score > _gameState.hiScore)
+                _gameState.hiScore = _gameState.score;
+
             if (_flappy.isDead)
             {
                 _gameState.isPaused = true;
@@ -171,6 +175,11 @@ void Game::Run()
             _gameBanner.text = "Press SPACE to unpause";
         }
 
+        if (_gameState.isPaused)
+        {
+            _gameBanner.hiScoreText = TextFormat("HI SCORE: %d", _gameState.hiScore);
+        }
+
         _gameBanner.scale = scale;
         _gameBanner.isVisible = _gameState.isPaused;
         _gameBanner.color = WHITE;
@@ -179,7 +188,7 @@ void Game::Run()
 
         BeginDrawing();
 
-        ClearBackground({ 0xAD, 0xCA, 0xFF, 0xFF });
+        ClearBackground(BLACK);
 
         BeginMode2D(_camera);
 

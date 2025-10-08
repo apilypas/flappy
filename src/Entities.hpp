@@ -6,6 +6,7 @@ struct GameState
 {
     bool isPaused = true;
     int score = 0;
+    int hiScore = 0;
     float deathTimer = 0.0f;
 };
 
@@ -81,6 +82,7 @@ struct GameBanner
     const char *text = "";
     const char *bannerText = "";
     const char *authorText = "";
+    const char *hiScoreText = "";
     float scale = 1.0f;
     Color color = WHITE;
     bool isVisible = false;
