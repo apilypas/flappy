@@ -1,7 +1,7 @@
-emcc -o index.html main.cpp \
-    -Os -Wall -Iraylib/src \
-    -Lpath_to_raylib_lib -s USE_GLFW=3 -s USE_WEBGL2=1 \
+emcc -o index.html src/*.cpp \
+    -Os -Wall -I../libs/raylib/raylib/include \
+    -L/usr/lib64/raylib -s USE_GLFW=3 -s USE_WEBGL2=1 \
     -s ASYNCIFY \
-    --shell-file raylib/src/minshell.html \
-    -DPLATFORM_WEB raylib/src/libraylib.web.a \
-    --preload-file resources
+    --shell-file ../libs/raylib/src/minshell.html \
+    -DPLATFORM_WEB ../libs/raylib/raylib/libraylib.a \
+    --preload-file assets
