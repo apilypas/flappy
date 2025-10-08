@@ -285,7 +285,7 @@ Pillar Game::CreatePillar(float x, float y)
     {
         pillar.type = PillarType::Sliding;
         pillar.isSlidingUp = (bool)GetRandomValue(0, 1);
-        pillar.slidingSpeed = 60.0f + (float)GetRandomValue(-20, 20);
+        pillar.slidingSpeed = 60.0f + (float)GetRandomValue(-30, 60);
         pillar.hasPowerUp = true;
     }
 
