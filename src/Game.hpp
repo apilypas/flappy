@@ -4,6 +4,7 @@
 #include "Entities.hpp"
 #include "BannerMessageSource.hpp"
 #include "FlappyRenderer.hpp"
+#include "MusicPlayer.hpp"
 #include "PillarRenderer.hpp"
 #include "BackgroundRenderer.hpp"
 #include "LabelRenderer.hpp"
@@ -42,6 +43,7 @@ class Game {
     TooltipRenderer _tooltipRenderer;
 
     SfxPlayer _sfxPlayer;
+    MusicPlayer _musicPlayer;
 public:
     void Initialize();
     void Run();

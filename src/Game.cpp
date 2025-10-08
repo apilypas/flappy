@@ -46,7 +46,9 @@ void Game::Run()
     _sfxPlayer.Initialize();
     _gameBannerRenderer.Initialize();
     _tooltipRenderer.Initialize();
+    _musicPlayer.Initialize();
 
+    _musicPlayer.Play();
     this->Reset();
 
     while (!WindowShouldClose())
@@ -178,6 +180,11 @@ void Game::Run()
         if (_gameState.isPaused)
         {
             _gameBanner.hiScoreText = TextFormat("HI SCORE: %d", _gameState.hiScore);
+            _musicPlayer.MakeVolumeLower();
+        }
+        else
+        {
+            _musicPlayer.MakeVolumeHigher();
         }
 
         _gameBanner.scale = scale;
@@ -185,6 +192,8 @@ void Game::Run()
         _gameBanner.color = WHITE;
         if (_gameState.deathTimer > 0.01f)
             _gameBanner.color = { 0xFF, 0x42, 0x31, 0xFF };
+
+        _musicPlayer.Update();
 
         BeginDrawing();
 
@@ -232,6 +241,7 @@ void Game::Run()
     _sfxPlayer.Uninitialize();
     _gameBannerRenderer.Uninitialize();
     _tooltipRenderer.Uninitialize();
+    _musicPlayer.Uninitialize();
 }
 
 void Game::Uninitialize()
