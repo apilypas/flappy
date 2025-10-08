@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <vector>
 #include "Entities.hpp"
 #include "BannerMessageSource.hpp"
@@ -9,10 +10,13 @@
 #include "PowerUpRenderer.hpp"
 #include "GameBannerRenderer.hpp"
 #include "SfxPlayer.hpp"
+#include "TooltipRenderer.hpp"
 
 class Game {
     bool showDebug;
     int _nextPillarId = 0;
+    int _nextTooltipId = 0;
+    std::map<PowerUpType, int> _powerUpCounts;
 
     BannerMessageSource _bannerMessageSource;
 
@@ -23,6 +27,7 @@ class Game {
     std::vector<Pillar> _pillars;
     std::vector<Label> _banners;
     std::vector<PowerUp> _powerUps;
+    std::vector<Tooltip> _tooltips;
     Background _background;
 
     GameBanner _gameBanner;
@@ -34,6 +39,7 @@ class Game {
     LabelRenderer _labelRenderer;
     PowerUpRenderer _powerUpRenderer;
     GameBannerRenderer _gameBannerRenderer;
+    TooltipRenderer _tooltipRenderer;
 
     SfxPlayer _sfxPlayer;
 public:
@@ -42,7 +48,7 @@ public:
     void Uninitialize();
 private:
     void Reset();
-    Pillar CreatePillar(float x, float y);
+    Pillar CreatePillar(float, float);
     void UpdatePhysics();
     void UpdatePillars(float);
     bool HandleScore();
@@ -52,5 +58,8 @@ private:
     void HandleDeathState();
     bool HandlePowerUps();
     bool HandleDoorUnlocks();
-    Label CreateBanner(float x, float y);
+    Label CreateBanner(float, float);
+    void UpdateTooltips(float);
+    void CreateTooltip(PowerUp&);
+    void CreateTooltip(Pillar&);
 };

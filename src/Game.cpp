@@ -45,6 +45,7 @@ void Game::Run()
     _powerUpRenderer.Initialize();
     _sfxPlayer.Initialize();
     _gameBannerRenderer.Initialize();
+    _tooltipRenderer.Initialize();
 
     this->Reset();
 
@@ -101,6 +102,7 @@ void Game::Run()
 
             this->UpdateBackground(scrollByX);
             this->UpdateBanners(scrollByX);
+            this->UpdateTooltips(scrollByX);
 
             this->HandleDeathState();
 
@@ -191,6 +193,9 @@ void Game::Run()
         
         for (auto &powerUp : _powerUps)
             _powerUpRenderer.Render(powerUp);
+
+        for (auto &tooltip : _tooltips)
+            _tooltipRenderer.Render(tooltip);
         
         _flappyRenderer.Render(_flappy);
 
@@ -215,6 +220,7 @@ void Game::Run()
     _powerUpRenderer.Uninitialize();
     _sfxPlayer.Uninitialize();
     _gameBannerRenderer.Uninitialize();
+    _tooltipRenderer.Uninitialize();
 }
 
 void Game::Uninitialize()
@@ -236,7 +242,11 @@ void Game::Reset()
     _banners.clear();
     _pillars.clear();
     _powerUps.clear();
+    _tooltips.clear();
+    _powerUpCounts.clear();
+
     _nextPillarId = 0;
+    _nextTooltipId = 0;
 
     for (float i = 0, x = 300, y = 20 + PILLAR_GAP; i < TOTAL_PILLARS; i++)
     {
@@ -301,6 +311,8 @@ Pillar Game::CreatePillar(float x, float y)
     }
 
     pillar.isScored = false;
+
+    CreateTooltip(pillar);
 
     TraceLog(LOG_INFO, "Created pillar: id=%d", pillar.id);
 
@@ -376,6 +388,19 @@ void Game::UpdatePillars(float scrollBy)
         pillar.door.x -= scrollBy;
         pillar.lockCenter.x -= scrollBy;
     }
+
+    for (auto &pillar : _pillars)
+    {
+        if (pillar.tooltipId > 0 && !pillar.isLocked)
+        {
+            for (auto &tooltip : _tooltips)
+            {
+                if (tooltip.id == pillar.tooltipId)
+                    tooltip.text = "Unlocked";
+            }
+            pillar.tooltipId = 0;
+        }
+    }
 }
 
 void Game::UpdatePowerUps(float scrollBy)
@@ -416,6 +441,8 @@ void Game::UpdatePowerUps(float scrollBy)
                     powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
                 }
 
+                this->CreateTooltip(powerUp);
+                
                 _powerUps.push_back(powerUp);
             }
             else if (r == 1)
@@ -429,6 +456,9 @@ void Game::UpdatePowerUps(float scrollBy)
                     32,
                     32
                 };
+
+                this->CreateTooltip(powerUp);
+
                 _powerUps.push_back(powerUp);
             }
             
@@ -549,6 +579,17 @@ bool Game::HandlePowerUps()
                 _gameState.score += 10;
             }
 
+            if (it->tooltipId > 0)
+            {
+                for (auto tooltipIt = _tooltips.begin(); tooltipIt != _tooltips.end(); )
+                {
+                    if (tooltipIt->id == it->tooltipId)
+                        _tooltips.erase(tooltipIt);
+                    else
+                        tooltipIt++;
+                }
+            }
+
             it = _powerUps.erase(it);
             isTaken = true;
         }
@@ -578,4 +619,80 @@ bool Game::HandleDoorUnlocks()
     }
 
     return isUnlocked;
+}
+
+void Game::UpdateTooltips(float scrollBy)
+{
+    for (auto it = _tooltips.begin(); it != _tooltips.end(); )
+    {
+        it->x -= scrollBy;
+
+        // Delete when too far
+        if (it->x < -SCREEN_WIDTH * 2)
+            it = _tooltips.erase(it);
+        else
+            it++;
+    }
+}
+
+void Game::CreateTooltip(PowerUp &powerUp)
+{
+    if (_powerUpCounts.find(powerUp.type) == _powerUpCounts.end())
+        _powerUpCounts[powerUp.type] = 0;
+
+    _powerUpCounts[powerUp.type]++;
+
+    // Limit amount of tooltips displayed to avoid clutter
+    if (_powerUpCounts[powerUp.type] > 2) return;
+    
+    Tooltip tooltip;
+
+    _nextTooltipId++;
+    tooltip.id = _nextTooltipId;
+    tooltip.text = "Unkown?";
+
+    if (powerUp.type == PowerUpType::Slow)
+        tooltip.text = "Slows down";
+    if (powerUp.type == PowerUpType::Points)
+        tooltip.text = "Extra points";
+
+    tooltip.x = powerUp.rect.x + powerUp.rect.width / 2.0f;
+    tooltip.y = powerUp.rect.y - 16.0f;
+
+    if (tooltip.y < 64.0f)
+        tooltip.y += 58.0f;
+
+    powerUp.tooltipId = tooltip.id;
+
+    _tooltips.push_back(tooltip);
+}
+
+void Game::CreateTooltip(Pillar &pillar)
+{
+    if (pillar.door.width > 0.01f && pillar.door.height > 0.01 && pillar.type == PillarType::Normal)
+    {
+        if (_powerUpCounts.find(PowerUpType::Unlock) == _powerUpCounts.end())
+            _powerUpCounts[PowerUpType::Unlock] = 0;
+
+        _powerUpCounts[PowerUpType::Unlock]++;
+
+        // Limit amount of tooltips displayed to avoid clutter
+        if (_powerUpCounts[PowerUpType::Unlock] > 2) return;
+
+        Tooltip tooltip;
+
+        _nextTooltipId++;
+        tooltip.id = _nextTooltipId;
+        tooltip.text = "Locked";
+
+        tooltip.x = pillar.lockCenter.x;
+        tooltip.y = pillar.lockCenter.y - 32.0f;
+
+        if (tooltip.y < 64.0f)
+            tooltip.y += 58.0f;
+
+        pillar.tooltipId = tooltip.id;
+
+        _tooltips.push_back(tooltip);
+    }
 }

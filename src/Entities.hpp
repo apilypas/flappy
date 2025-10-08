@@ -41,6 +41,7 @@ struct Pillar
     bool hasPowerUp = false;
     bool isSlidingUp = false;
     float slidingSpeed = 60.0f;
+    int tooltipId = 0;
 };
 
 struct Background
@@ -63,13 +64,15 @@ struct Label
 enum class PowerUpType
 {
     Slow,
-    Points
+    Points,
+    Unlock
 };
 
 struct PowerUp
 {
     PowerUpType type = PowerUpType::Slow;
     Rectangle rect = { 0.0f, 0.0f, 0.0f, 0.0f };
+    int tooltipId = 0;
 };
 
 struct GameBanner
@@ -80,4 +83,12 @@ struct GameBanner
     float scale = 1.0f;
     Color color = WHITE;
     bool isVisible = false;
+};
+
+struct Tooltip
+{
+    int id = 0;
+    const char *text = "";
+    float x = 0.0f;
+    float y = 0.0f;
 };
