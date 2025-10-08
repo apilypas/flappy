@@ -225,10 +225,9 @@ void Game::Uninitialize()
 
 void Game::Reset()
 {
-    _flappy.rect.x = 100.0f;
-    _flappy.rect.y = SCREEN_HEIGHT / 2.0f - 16.0f;
-    _flappy.rect.width = 32.0f;
-    _flappy.rect.height = 32.0f;
+    _flappy.radius = 16.0f;
+    _flappy.center.x = 116.0f;
+    _flappy.center.y = SCREEN_HEIGHT / 2.0f;
     _flappy.velocity = 0.0f;
     _flappy.rotation = 0.0f;
     _flappy.rotationVelocity = 0.0f;
@@ -316,7 +315,7 @@ void Game::UpdatePhysics()
     _flappy.velocity -= 8.9f * deltaTime;
 
     // Calculate y
-    _flappy.rect.y -= _flappy.velocity;
+    _flappy.center.y -= _flappy.velocity;
 
     if (_flappy.rotationVelocity > 0)
     {
@@ -329,7 +328,7 @@ void Game::UpdatePhysics()
 
 void Game::UpdatePillars(float scrollBy)
 {
-    bool doShift = _pillars[0].bottom.x < _flappy.rect.x - (160 * 7);
+    bool doShift = _pillars[0].bottom.x < _flappy.center.x - (160 * 7);
     float deltaTime = GetFrameTime();
 
     if (doShift)
@@ -442,7 +441,7 @@ bool Game::HandleScore()
 {
     for (auto &pillar : _pillars)
     {
-        if (pillar.bottom.x < _flappy.rect.x && !pillar.isScored)
+        if (pillar.bottom.x < _flappy.center.x && !pillar.isScored)
         {
             pillar.isScored = true;
             _gameState.score++;
@@ -489,20 +488,13 @@ void Game::UpdateBanners(float scrollBy)
 
 void Game::HandleDeathState()
 {
-    Rectangle flappyHitBox = { 
-        _flappy.rect.x + 4, 
-        _flappy.rect.y + 4, 
-        _flappy.rect.width - 8, 
-        _flappy.rect.height - 8 
-    };
-
     for (auto &pillar : _pillars)
     {
         _flappy.isDead = 
-            CheckCollisionRecs(flappyHitBox, pillar.bottom)
-            || CheckCollisionRecs(flappyHitBox, pillar.top)
-            || (pillar.door.width > 0.01f && pillar.door.height >= 0.01f && pillar.isLocked && CheckCollisionRecs(flappyHitBox, pillar.door))
-            || _flappy.rect.y > SCREEN_HEIGHT * 4;
+            CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.bottom)
+            || CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.top)
+            || (pillar.door.width > 0.01f && pillar.door.height >= 0.01f && pillar.isLocked && CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.door))
+            || _flappy.center.y > SCREEN_HEIGHT * 4;
         
         if (_flappy.isDead)
             break;
@@ -546,7 +538,7 @@ bool Game::HandlePowerUps()
 
     for (auto it = _powerUps.begin(); it != _powerUps.end(); )
     {
-        if (CheckCollisionRecs(_flappy.rect, it->rect))
+        if (CheckCollisionCircleRec(_flappy.center, _flappy.radius, it->rect))
         {
             if (it->type == PowerUpType::Slow)
             {
@@ -576,14 +568,7 @@ bool Game::HandleDoorUnlocks()
     {
         if (pillar.door.height > 0.01f && pillar.door.width > 0.01f)
         {
-            Rectangle rect = { 
-                _flappy.rect.x + 4,
-                _flappy.rect.y + 4,
-                _flappy.rect.width - 8,
-                _flappy.rect.height - 8
-            };
-            
-            if (pillar.isLocked && CheckCollisionCircleRec(pillar.lockCenter, pillar.lockRadius, rect))
+            if (pillar.isLocked && CheckCollisionCircles(pillar.lockCenter, pillar.lockRadius, _flappy.center, _flappy.radius))
             {
                 // Open door
                 isUnlocked = true;

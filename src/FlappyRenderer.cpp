@@ -1,4 +1,5 @@
 #include "FlappyRenderer.hpp"
+#include <raylib.h>
 
 void FlappyRenderer::Initialize()
 {
@@ -11,10 +12,10 @@ void FlappyRenderer::Render(Flappy &flappy)
         _texture,
         { 0, 0, 32, 32 },
         { 
-            flappy.rect.x + 16,
-            flappy.rect.y + 16,
-            flappy.rect.width,
-            flappy.rect.height
+            flappy.center.x,
+            flappy.center.y,
+            32.0f,
+            32.0f
         },
         { 16, 16 },
         flappy.rotation,

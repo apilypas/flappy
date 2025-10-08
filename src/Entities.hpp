@@ -11,7 +11,8 @@ struct GameState
 
 struct Flappy
 {
-    Rectangle rect = { 0, 0, 0, 0 };
+    Vector2 center = { 0, 0 };
+    float radius = 0;
     float velocity = 0.0f;
     float rotation = 0.0f;
     float rotationVelocity = 0.0f;
