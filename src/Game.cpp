@@ -119,7 +119,7 @@ void Game::Run()
             if (_flappy.isDead)
             {
                 _gameState.isPaused = true;
-                _gameState.deathTimer = 10.0f;
+                _gameState.deathTimer = 5.0f;
                 _sfxPlayer.Play(SfxType::Hit);
             }
         }
