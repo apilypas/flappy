@@ -34,6 +34,7 @@ struct Pillar
     Rectangle top = { 0, 0, 0, 0 };
     Rectangle bottom = { 0, 0, 0, 0 };
     Rectangle door = { 0, 0, 0, 0 };
+    float gapSize = PILLAR_GAP;
     Vector2 lockCenter = { 0, 0};
     float lockRadius = 0.0f;
     bool isLocked = false;

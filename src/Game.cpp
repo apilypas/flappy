@@ -250,16 +250,18 @@ void Game::Reset()
     _nextPillarId = 0;
     _nextTooltipId = 0;
 
-    for (float i = 0, x = 300, y = 20 + PILLAR_GAP; i < TOTAL_PILLARS; i++)
+    for (float i = 0, x = 300, gap = PILLAR_GAP, y = 20 + gap; i < TOTAL_PILLARS; i++)
     {
         auto pillar = CreatePillar(x, y);
+
+        gap = pillar.gapSize;
 
         x += PILLAR_SPACE;
 
         if (i < 3)
             y += 50;
         else
-            y = (float)GetRandomValue(20 + PILLAR_GAP, SCREEN_HEIGHT - 20);
+            y = (float)GetRandomValue(20 + (int)pillar.gapSize, SCREEN_HEIGHT - 20);
 
         _pillars.push_back(pillar);
     }
@@ -279,15 +281,19 @@ Pillar Game::CreatePillar(float x, float y)
 
     pillar.id = _nextPillarId++;
     pillar.type = PillarType::Normal;
+    pillar.gapSize = PILLAR_GAP;
 
     if ((_nextPillarId <= 20 && _nextPillarId % 5 == 0)
         || (_nextPillarId > 20 && GetRandomValue(0, 2) == 0))
     {
         pillar.type = PillarType::Sliding;
         pillar.isSlidingUp = (bool)GetRandomValue(0, 1);
-        pillar.slidingSpeed = 60.0f + (float)GetRandomValue(-30, 60);
+        pillar.slidingSpeed = 60.0f + (float)GetRandomValue(-30, 30);
         pillar.hasPowerUp = true;
     }
+
+    if (pillar.type == PillarType::Normal && pillar.id >= 10 && GetRandomValue(0, 1))
+        pillar.gapSize = PILLAR_GAP_SMALL;
 
     pillar.bottom.x = x;
     pillar.bottom.y = y;
@@ -295,18 +301,18 @@ Pillar Game::CreatePillar(float x, float y)
     pillar.bottom.height = PILLAR_HEIGHT;
 
     pillar.top.x = x;
-    pillar.top.y = y - PILLAR_HEIGHT - PILLAR_GAP;
+    pillar.top.y = y - PILLAR_HEIGHT - pillar.gapSize;
     pillar.top.width = PILLAR_WIDTH;
     pillar.top.height = PILLAR_HEIGHT;
 
     if (_nextPillarId > 10 && GetRandomValue(0, 1) == 0)
     {
         pillar.door.x = x;
-        pillar.door.y = y - PILLAR_GAP;
+        pillar.door.y = y - pillar.gapSize;
         pillar.door.width = PILLAR_WIDTH;
-        pillar.door.height = PILLAR_GAP;
+        pillar.door.height = pillar.gapSize;
 
-        pillar.lockCenter = { x - 48.0f, y + (float)GetRandomValue(0, -PILLAR_GAP + 32.0f) };
+        pillar.lockCenter = { x - 48.0f, y + (float)GetRandomValue(0, (int) (-pillar.gapSize + 32.0f)) };
         pillar.lockRadius = 16.0f;
 
         pillar.isLocked = true;
@@ -350,7 +356,7 @@ void Game::UpdatePillars(float scrollBy)
         _pillars.erase(_pillars.begin());
 
         float x = _pillars[_pillars.size() - 1].top.x + PILLAR_SPACE;
-        float y = (float)GetRandomValue(40 + PILLAR_GAP, SCREEN_HEIGHT - 40);
+        float y = (float)GetRandomValue(40 + (int)(_pillars[_pillars.size() - 1].gapSize), SCREEN_HEIGHT - 40);
         
         auto pillar = CreatePillar(x, y);
         
@@ -367,7 +373,7 @@ void Game::UpdatePillars(float scrollBy)
                 pillar.top.y -= pillar.slidingSpeed * deltaTime;
                 pillar.door.y -= pillar.slidingSpeed * deltaTime;
                 pillar.lockCenter.y -= pillar.slidingSpeed * deltaTime;
-                if (pillar.bottom.y <= 20.0f + PILLAR_GAP)
+                if (pillar.bottom.y <= 20.0f + pillar.gapSize)
                     pillar.isSlidingUp = false;
             }
             else
@@ -440,7 +446,7 @@ void Game::UpdatePowerUps(float scrollBy)
                 if (pillar.isLocked)
                 {
                     powerUp.rect.x = pillar.bottom.x + pillar.bottom.width + 16.0f;
-                    powerUp.rect.y = pillar.bottom.y - PILLAR_GAP / 2.0f - 16.0f;
+                    powerUp.rect.y = pillar.bottom.y - pillar.gapSize / 2.0f - 16.0f;
                 }
 
                 this->CreateTooltip(powerUp);
