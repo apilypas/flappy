@@ -447,9 +447,19 @@ void Game::UpdatePowerUps(float scrollBy)
     {
         if (!pillar.hasPowerUp)
         {
-            int r = GetRandomValue(0, 2);
+            int slowChanceMax = 2;
+            if (pillar.id > 30)
+                slowChanceMax = 3;
+            if (pillar.id > 80)
+                slowChanceMax = 4;
+            if (pillar.id > 160)
+                slowChanceMax = 6;
+            if (pillar.id > 300)
+                slowChanceMax = 8;
+
+            int slowChance = GetRandomValue(0, slowChanceMax);
             
-            if (r == 0 || (r == 1 && pillar.isLocked))
+            if (slowChance == 0)
             {
                 PowerUp powerUp;
                 powerUp.type = PowerUpType::Slow;
@@ -472,7 +482,10 @@ void Game::UpdatePowerUps(float scrollBy)
                 
                 _powerUps.push_back(powerUp);
             }
-            else if (r == 1)
+
+            int pointsChance = GetRandomValue(0, 2);
+
+            if (pointsChance == 0)
             {
                 bool isOnTop = GetRandomValue(0, 1);
                 PowerUp powerUp;
