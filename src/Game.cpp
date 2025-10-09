@@ -14,13 +14,8 @@ void Game::Initialize()
     SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flappy Oik");
     InitAudioDevice();
-    SetExitKey(KEY_Q);
-    SetTargetFPS(60);
-}
-
-void Game::Run()
-{
-    showDebug = false;
+    
+    _showDebug = false;
 
     _gameBanner.text = "Press SPACE to start";
     _gameBanner.bannerText = "Flappy Oik";
@@ -50,189 +45,192 @@ void Game::Run()
 
     _musicPlayer.Play();
     this->Reset();
+}
 
-    while (!WindowShouldClose())
+void Game::DoFrame()
+{
+    float deltaTime = GetFrameTime();
+    float scrollByX = _flappy.speed * deltaTime;
+
+    // Handle inputs
+    if (IsKeyPressed(KEY_SPACE)
+        || IsKeyPressed(KEY_UP)
+        || IsKeyPressed(KEY_W)
+        || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        float deltaTime = GetFrameTime();
-        float scrollByX = _flappy.speed * deltaTime;
+        _flappy.isJumping = true;
+        _gameState.isPaused = _gameState.deathTimer > 0;
+    }
 
-        // Handle inputs
-        if (IsKeyPressed(KEY_SPACE)
-            || IsKeyPressed(KEY_UP)
-            || IsKeyPressed(KEY_W)
-            || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        _gameState.isPaused = true;
+    }
+
+    if ((IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER))
+        || (IsKeyDown(KEY_RIGHT_ALT) && IsKeyPressed(KEY_ENTER)))
+    {
+        ToggleFullscreen();
+    }
+
+    if (IsKeyPressed(KEY_F12))
+    {
+        _showDebug = !_showDebug;
+    }
+
+    // Loop part that should be paused
+    if (!_gameState.isPaused && _gameState.deathTimer <= 0)
+    {
+        if (_flappy.isDead)
         {
-            _flappy.isJumping = true;
-            _gameState.isPaused = _gameState.deathTimer > 0;
+            _flappy.isDead = false;
+            this->Reset();
         }
 
-        if (IsKeyPressed(KEY_ESCAPE))
+        this->UpdatePhysics();
+        this->UpdatePillars(scrollByX);
+        this->UpdatePowerUps(scrollByX);
+
+        if (_flappy.isJumping)
         {
-            _gameState.isPaused = true;
+            _flappy.velocity = JUMP_VELOCITY;
+            _flappy.rotationVelocity = 45.0f;
+            _sfxPlayer.Play(SfxType::Jump);
         }
 
-        if ((IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER))
-            || (IsKeyDown(KEY_RIGHT_ALT) && IsKeyPressed(KEY_ENTER)))
-        {
-            ToggleFullscreen();
-        }
+        this->UpdateBackground(scrollByX);
+        this->UpdateBanners(scrollByX);
+        this->UpdateTooltips(scrollByX);
 
-        if (IsKeyPressed(KEY_F12))
-        {
-            showDebug = !showDebug;
-        }
+        this->HandleDeathState();
 
-        // Loop part that should be paused
-        if (!_gameState.isPaused && _gameState.deathTimer <= 0)
-        {
-            if (_flappy.isDead)
-            {
-                _flappy.isDead = false;
-                this->Reset();
-            }
+        if (this->HandleScore())
+            _sfxPlayer.Play(SfxType::Point);
 
-            this->UpdatePhysics();
-            this->UpdatePillars(scrollByX);
-            this->UpdatePowerUps(scrollByX);
+        if (this->HandlePowerUps())
+            _sfxPlayer.Play(SfxType::PowerUp);
 
-            if (_flappy.isJumping)
-            {
-                _flappy.velocity = JUMP_VELOCITY;
-                _flappy.rotationVelocity = 45.0f;
-                _sfxPlayer.Play(SfxType::Jump);
-            }
+        if (this->HandleDoorUnlocks())
+            _sfxPlayer.Play(SfxType::Unlock);
 
-            this->UpdateBackground(scrollByX);
-            this->UpdateBanners(scrollByX);
-            this->UpdateTooltips(scrollByX);
+        // Increase speed over time
+        _flappy.speed += deltaTime * 4.0f;
 
-            this->HandleDeathState();
-
-            if (this->HandleScore())
-                _sfxPlayer.Play(SfxType::Point);
-
-            if (this->HandlePowerUps())
-                _sfxPlayer.Play(SfxType::PowerUp);
-
-            if (this->HandleDoorUnlocks())
-                _sfxPlayer.Play(SfxType::Unlock);
-
-            // Increase speed over time
-            _flappy.speed += deltaTime * 4.0f;
-
-            // Update hi score
-            if (_gameState.score > _gameState.hiScore)
-                _gameState.hiScore = _gameState.score;
-
-            if (_flappy.isDead)
-            {
-                _gameState.isPaused = true;
-                _gameState.deathTimer = 5.0f;
-                _sfxPlayer.Play(SfxType::Hit);
-            }
-        }
-
-        if (_gameState.deathTimer > 0)
-            _gameState.deathTimer -= deltaTime;
-
-        // Reset values
-        _flappy.isJumping = false;
-
-        int screenWidth = GetRenderWidth();
-        int screenHeight = GetRenderHeight();
-
-        if (screenWidth < SCREEN_WIDTH || screenHeight < SCREEN_HEIGHT) {
-            SetWindowSize(
-                screenWidth < SCREEN_WIDTH ? SCREEN_WIDTH : screenWidth,
-                screenHeight < SCREEN_HEIGHT ? SCREEN_HEIGHT : screenHeight
-            );
-        }
-
-        float scaleX = (float)screenWidth / SCREEN_WIDTH;
-        float scaleY = (float)screenHeight / SCREEN_HEIGHT;
-        float scale = fminf(scaleX, scaleY);
-
-        _camera.zoom = scale;
-
-        // Adjust offset to correctly fit everything in screen
-        _camera.offset = {
-            ((float)screenWidth - (float)SCREEN_WIDTH * scale) / 2.0f,
-            ((float)screenHeight - (float)SCREEN_HEIGHT * scale) / 2.0f
-        };
-
-        // Update labels
-        _scoreLabel.fontSize = 20.0f * scale;
-        _scoreLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_scoreLabel.text, (int)_scoreLabel.fontSize) / 2;
-        _scoreLabel.text = TextFormat("Score: %d", _gameState.score);
+        // Update hi score
+        if (_gameState.score > _gameState.hiScore)
+            _gameState.hiScore = _gameState.score;
 
         if (_flappy.isDead)
         {
-            if (_gameState.deathTimer > 0.01f)
-                _gameBanner.text = TextFormat("Game is OVER! (%d)", (int)_gameState.deathTimer);
-            else
-                _gameBanner.text = "Press SPACE to restart";
+            _gameState.isPaused = true;
+            _gameState.deathTimer = 5.0f;
+            _sfxPlayer.Play(SfxType::Hit);
         }
-        else if (_gameState.isPaused)
-        {
-            _gameBanner.text = "Press SPACE to unpause";
-        }
-
-        if (_gameState.isPaused)
-        {
-            _gameBanner.hiScoreText = TextFormat("HI SCORE: %d", _gameState.hiScore);
-            _musicPlayer.MakeVolumeLower();
-        }
-        else
-        {
-            _musicPlayer.MakeVolumeHigher();
-        }
-
-        _gameBanner.scale = scale;
-        _gameBanner.isVisible = _gameState.isPaused;
-        _gameBanner.color = WHITE;
-        if (_gameState.deathTimer > 0.01f)
-            _gameBanner.color = { 0xFF, 0x42, 0x31, 0xFF };
-
-        _musicPlayer.Update();
-
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-
-        BeginMode2D(_camera);
-
-        // Render background and background objects
-        _backgroundRenderer.Render(_background);
-        
-        for (auto &banner : _banners)
-            _labelRenderer.Render(banner);
-
-        // Render world objects
-        for (auto &pillar : _pillars)
-            _pillarRenderer.Render(pillar);
-        
-        for (auto &powerUp : _powerUps)
-            _powerUpRenderer.Render(powerUp);
-
-        for (auto &tooltip : _tooltips)
-            _tooltipRenderer.Render(tooltip);
-        
-        _flappyRenderer.Render(_flappy);
-
-        EndMode2D();
-
-        // Render HUD
-        _labelRenderer.Render(_scoreLabel);
-        _gameBannerRenderer.Render(_gameBanner);
-
-        if (showDebug)
-        {
-            DrawFPS(10, 10);
-        }
-
-        EndDrawing();
     }
 
+    if (_gameState.deathTimer > 0)
+        _gameState.deathTimer -= deltaTime;
+
+    // Reset values
+    _flappy.isJumping = false;
+
+    int screenWidth = GetRenderWidth();
+    int screenHeight = GetRenderHeight();
+
+    if (screenWidth < SCREEN_WIDTH || screenHeight < SCREEN_HEIGHT) {
+        SetWindowSize(
+            screenWidth < SCREEN_WIDTH ? SCREEN_WIDTH : screenWidth,
+            screenHeight < SCREEN_HEIGHT ? SCREEN_HEIGHT : screenHeight
+        );
+    }
+
+    float scaleX = (float)screenWidth / SCREEN_WIDTH;
+    float scaleY = (float)screenHeight / SCREEN_HEIGHT;
+    float scale = fminf(scaleX, scaleY);
+
+    _camera.zoom = scale;
+
+    // Adjust offset to correctly fit everything in screen
+    _camera.offset = {
+        ((float)screenWidth - (float)SCREEN_WIDTH * scale) / 2.0f,
+        ((float)screenHeight - (float)SCREEN_HEIGHT * scale) / 2.0f
+    };
+
+    // Update labels
+    _scoreLabel.fontSize = 20.0f * scale;
+    _scoreLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_scoreLabel.text, (int)_scoreLabel.fontSize) / 2;
+    _scoreLabel.text = TextFormat("Score: %d", _gameState.score);
+
+    if (_flappy.isDead)
+    {
+        if (_gameState.deathTimer > 0.01f)
+            _gameBanner.text = TextFormat("Game is OVER! (%d)", (int)_gameState.deathTimer);
+        else
+            _gameBanner.text = "Press SPACE to restart";
+    }
+    else if (_gameState.isPaused)
+    {
+        _gameBanner.text = "Press SPACE to unpause";
+    }
+
+    if (_gameState.isPaused)
+    {
+        _gameBanner.hiScoreText = TextFormat("HI SCORE: %d", _gameState.hiScore);
+        _musicPlayer.MakeVolumeLower();
+    }
+    else
+    {
+        _musicPlayer.MakeVolumeHigher();
+    }
+
+    _gameBanner.scale = scale;
+    _gameBanner.isVisible = _gameState.isPaused;
+    _gameBanner.color = WHITE;
+    if (_gameState.deathTimer > 0.01f)
+        _gameBanner.color = { 0xFF, 0x42, 0x31, 0xFF };
+
+    _musicPlayer.Update();
+
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+
+    BeginMode2D(_camera);
+
+    // Render background and background objects
+    _backgroundRenderer.Render(_background);
+    
+    for (auto &banner : _banners)
+        _labelRenderer.Render(banner);
+
+    // Render world objects
+    for (auto &pillar : _pillars)
+        _pillarRenderer.Render(pillar);
+    
+    for (auto &powerUp : _powerUps)
+        _powerUpRenderer.Render(powerUp);
+
+    for (auto &tooltip : _tooltips)
+        _tooltipRenderer.Render(tooltip);
+    
+    _flappyRenderer.Render(_flappy);
+
+    EndMode2D();
+
+    // Render HUD
+    _labelRenderer.Render(_scoreLabel);
+    _gameBannerRenderer.Render(_gameBanner);
+
+    if (_showDebug)
+    {
+        DrawFPS(10, 10);
+    }
+
+    EndDrawing();
+}
+
+void Game::Uninitialize()
+{
     _labelRenderer.Uninitialize();
     _backgroundRenderer.Uninitialize();
     _pillarRenderer.Uninitialize();
@@ -242,10 +240,7 @@ void Game::Run()
     _gameBannerRenderer.Uninitialize();
     _tooltipRenderer.Uninitialize();
     _musicPlayer.Uninitialize();
-}
 
-void Game::Uninitialize()
-{
     CloseAudioDevice();
     CloseWindow();
 }

@@ -1,7 +1,23 @@
 emcc -o index.html src/*.cpp \
-    -Os -Wall -I../libs/raylib/raylib/include \
-    -L/usr/lib64/raylib -s USE_GLFW=3 -s USE_WEBGL2=1 \
+    -Os \
+    -Wall \
+    -I../libs/raylib/raylib/include \
+    -I../libs \
+    -L/usr/lib64/raylib \
+    -s USE_GLFW=3 \
+    -s USE_WEBGL2=1 \
+    -s MAX_WEBGL_VERSION=2 \
+    -s MIN_WEBGL_VERSION=2 \
+    -s ASSERTIONS=0 \
+    -s LLD_REPORT_UNDEFINED \
     -s ASYNCIFY \
+    -s WASM=1 \
+    -s ENVIRONMENT=web \
     --shell-file ../libs/raylib/src/minshell.html \
-    -DPLATFORM_WEB ../libs/raylib/raylib/libraylib.a \
+    -DPLATFORM_WEB \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DGRAPHICS=GRAPHICS_API_OPENGL_ES2 \
+    -DOPENGL_VERSION=100 \
+    ../libs/raylib/raylib/libraylib.a \
     --preload-file assets

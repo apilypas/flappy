@@ -14,7 +14,7 @@
 #include "TooltipRenderer.hpp"
 
 class Game {
-    bool showDebug;
+    bool _showDebug;
     int _nextPillarId = 0;
     int _nextTooltipId = 0;
     std::map<PowerUpType, int> _powerUpCounts;
@@ -46,7 +46,7 @@ class Game {
     MusicPlayer _musicPlayer;
 public:
     void Initialize();
-    void Run();
+    void DoFrame();
     void Uninitialize();
 private:
     void Reset();
