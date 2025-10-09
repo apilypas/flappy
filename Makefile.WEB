@@ -1,0 +1,36 @@
+# Project settings
+TARGET = flappy-web.html
+SRC_DIR = src
+OBJ_DIR = build-web
+
+# Find all .cpp files in src/
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
+
+# Compiler and flags
+CXX = emcc
+CXXFLAGS = -Os -Wall -I../libs/raylib/raylib/include -DPLATFORM_WEB -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DGRAPHICS=GRAPHICS_API_OPENGL_ES2 -DOPENGL_VERSION=100
+LDFLAGS = -s USE_GLFW=3 -s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s ASSERTIONS=0 -s LLD_REPORT_UNDEFINED -s ASYNCIFY -s WASM=1 -s ENVIRONMENT=web --shell-file ../libs/raylib/src/minshell.html --preload-file assets
+
+# Raylib
+LIBS = ../libs/raylib/raylib/libraylib.a
+
+# Default rule
+all: $(TARGET)
+
+# Link
+$(TARGET): $(OBJS)
+	$(CXX) $(OBJS) $(LDFLAGS) $(CXXFLAGS) -o $(TARGET) $(LIBS)
+
+# Compile each .cpp into .o
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean build files
+clean:
+	rm -rf $(OBJ_DIR) $(TARGET) flappy-web.data flappy-web.js flappy-web.wasm
+
+# Run the game
+run: $(TARGET)
+	python3 -m http.server 8080
