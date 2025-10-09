@@ -1,5 +1,5 @@
 # Project settings
-TARGET = flappy-web.html
+TARGET = index.html index.data index.js index.wasm
 SRC_DIR = src
 OBJ_DIR = build-web
 
@@ -20,7 +20,7 @@ all: $(TARGET)
 
 # Link
 $(TARGET): $(OBJS)
-	$(CXX) $(OBJS) $(LDFLAGS) $(CXXFLAGS) -o $(TARGET) $(LIBS)
+	$(CXX) $(OBJS) $(LDFLAGS) $(CXXFLAGS) -o $(firstword $(TARGET)) $(LIBS)
 
 # Compile each .cpp into .o
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
@@ -29,7 +29,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Clean build files
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET) flappy-web.data flappy-web.js flappy-web.wasm
+	rm -rf $(OBJ_DIR) $(TARGET)
 
 # Run the game
 run: $(TARGET)

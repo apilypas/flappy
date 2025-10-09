@@ -2,7 +2,7 @@ build
 build-web
 .vscode
 flappy
-flappy-web.html
-flappy-web.data
-flappy-web.js
-flappy-web.wasm
+index.html
+index.data
+index.js
+index.wasm
