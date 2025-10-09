@@ -11,7 +11,7 @@
 void Game::Initialize()
 {
     SetRandomSeed((unsigned int)time(NULL));
-    SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Flappy Oik");
     InitAudioDevice();
     
@@ -87,14 +87,14 @@ void Game::DoFrame()
             this->Reset();
         }
 
-        this->UpdatePhysics();
+        this->UpdatePhysics(deltaTime);
         this->UpdatePillars(scrollByX);
         this->UpdatePowerUps(scrollByX);
 
         if (_flappy.isJumping)
         {
-            _flappy.velocity = JUMP_VELOCITY;
-            _flappy.rotationVelocity = 45.0f;
+            _flappy.velocityY = -JUMP_VELOCITY;
+            _flappy.rotationVelocity = ROTATION_VELOCITY;
             _sfxPlayer.Play(SfxType::Jump);
         }
 
@@ -250,7 +250,7 @@ void Game::Reset()
     _flappy.radius = 16.0f;
     _flappy.center.x = 116.0f;
     _flappy.center.y = SCREEN_HEIGHT / 2.0f;
-    _flappy.velocity = 0.0f;
+    _flappy.velocityY = 0.0f;
     _flappy.rotation = 0.0f;
     _flappy.rotationVelocity = 0.0f;
     _flappy.speed = INITIAL_SPEED;
@@ -341,20 +341,19 @@ Pillar Game::CreatePillar(float x, float y)
     return pillar;
 }
 
-void Game::UpdatePhysics()
+void Game::UpdatePhysics(float deltaTime)
 {
-    float deltaTime = GetFrameTime();
-
     // Apply gravity
-    _flappy.velocity -= 8.9f * deltaTime;
+    _flappy.velocityY += 980.0f * deltaTime;
 
     // Calculate y
-    _flappy.center.y -= _flappy.velocity;
+    _flappy.center.y += _flappy.velocityY * deltaTime;
 
     if (_flappy.rotationVelocity > 0)
     {
-        _flappy.rotationVelocity -= 60.0f * deltaTime;
-        _flappy.rotation += _flappy.rotationVelocity;
+        _flappy.rotationVelocity -= 2000.0f * deltaTime;
+        _flappy.rotationVelocity = std::max(0.0f, _flappy.rotationVelocity);
+        _flappy.rotation += _flappy.rotationVelocity * deltaTime;
         if (_flappy.rotation > 360.0f)
             _flappy.rotation -= 360.0f;
     }
@@ -556,9 +555,9 @@ void Game::HandleDeathState()
     for (auto &pillar : _pillars)
     {
         _flappy.isDead = 
-            CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.bottom)
-            || CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.top)
-            || (pillar.door.width > 0.01f && pillar.door.height >= 0.01f && pillar.isLocked && CheckCollisionCircleRec(_flappy.center, _flappy.radius - 2.0f, pillar.door))
+            CheckCollisionCircleRec(_flappy.center, _flappy.radius - 4.0f, pillar.bottom)
+            || CheckCollisionCircleRec(_flappy.center, _flappy.radius - 4.0f, pillar.top)
+            || (pillar.door.width > 0.01f && pillar.door.height >= 0.01f && pillar.isLocked && CheckCollisionCircleRec(_flappy.center, _flappy.radius - 4.0f, pillar.door))
             || _flappy.center.y > SCREEN_HEIGHT * 4;
         
         if (_flappy.isDead)

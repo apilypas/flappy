@@ -51,7 +51,7 @@ public:
 private:
     void Reset();
     Pillar CreatePillar(float, float);
-    void UpdatePhysics();
+    void UpdatePhysics(float);
     void UpdatePillars(float);
     bool HandleScore();
     void UpdateBackground(float);

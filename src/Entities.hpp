@@ -14,7 +14,7 @@ struct Flappy
 {
     Vector2 center = { 0, 0 };
     float radius = 0;
-    float velocity = 0.0f;
+    float velocityY = 0.0f;
     float rotation = 0.0f;
     float rotationVelocity = 0.0f;
     bool isJumping = false;
