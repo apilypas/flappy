@@ -48,6 +48,13 @@ void GameBannerRenderer::Render(GameBanner &b)
         box,
         { 0, -260.0f * b.scale },
         { 0xFB, 0x8C, 0x81, 0xFF });
+    
+    this->DrawText(
+        b.gameOverText,
+        _textFontSize * b.scale,
+        box,
+        { 0, 140.0f * b.scale },
+        { 0xFF, 0x42, 0x31, 0xFF });
 
     this->DrawText(
         b.text,

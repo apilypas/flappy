@@ -123,7 +123,7 @@ void Game::DoFrame()
         if (_flappy.isDead)
         {
             _gameState.isPaused = true;
-            _gameState.deathTimer = 5.0f;
+            _gameState.deathTimer = 1.0f;
             _sfxPlayer.Play(SfxType::Hit);
         }
     }
@@ -160,13 +160,12 @@ void Game::DoFrame()
     _scoreLabel.fontSize = 20.0f * scale;
     _scoreLabel.x = (float)screenWidth / 2.0f - (float)MeasureText(_scoreLabel.text, (int)_scoreLabel.fontSize) / 2;
     _scoreLabel.text = TextFormat("Score: %d", _gameState.score);
+    _gameBanner.gameOverText = "";
 
     if (_flappy.isDead)
     {
-        if (_gameState.deathTimer > 0.01f)
-            _gameBanner.text = TextFormat("Game is OVER! (%d)", (int)_gameState.deathTimer);
-        else
-            _gameBanner.text = "Press SPACE to restart";
+        _gameBanner.gameOverText = TextFormat("Game is OVER!");
+        _gameBanner.text = "Press SPACE to restart";
     }
     else if (_gameState.isPaused)
     {
@@ -186,8 +185,6 @@ void Game::DoFrame()
     _gameBanner.scale = scale;
     _gameBanner.isVisible = _gameState.isPaused;
     _gameBanner.color = WHITE;
-    if (_gameState.deathTimer > 0.01f)
-        _gameBanner.color = { 0xFF, 0x42, 0x31, 0xFF };
 
     _musicPlayer.Update();
 

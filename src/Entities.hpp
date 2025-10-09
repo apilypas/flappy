@@ -83,6 +83,7 @@ struct GameBanner
     const char *bannerText = "";
     const char *authorText = "";
     const char *hiScoreText = "";
+    const char *gameOverText = "";
     float scale = 1.0f;
     Color color = WHITE;
     bool isVisible = false;
