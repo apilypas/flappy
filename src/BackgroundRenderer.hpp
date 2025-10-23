@@ -2,8 +2,10 @@
 #include "Entities.hpp"
 #include "raylib.h"
 
-class BackgroundRenderer {
+class BackgroundRenderer
+{
     Texture2D _texture;
+
 public:
     void Initialize();
     void Render(Background &);

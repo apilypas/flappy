@@ -2,10 +2,12 @@
 #include "Entities.hpp"
 #include "raylib.h"
 
-class LabelRenderer {
+class LabelRenderer
+{
     Font _font;
+
 public:
     void Initialize();
-    void Render(Label&);
+    void Render(Label &);
     void Uninitialize();
 };

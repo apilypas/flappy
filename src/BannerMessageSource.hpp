@@ -1,6 +1,7 @@
 #pragma once
 
-class BannerMessageSource {
+class BannerMessageSource
+{
 public:
-    const char* GetRandom();
+    const char *GetRandom();
 };

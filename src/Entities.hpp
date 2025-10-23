@@ -2,17 +2,15 @@
 #include "Constants.hpp"
 #include "raylib.h"
 
-struct GameState
-{
+struct GameState {
     bool isPaused = true;
     int score = 0;
     int hiScore = 0;
     float deathTimer = 0.0f;
 };
 
-struct Flappy
-{
-    Vector2 center = { 0, 0 };
+struct Flappy {
+    Vector2 center = {0, 0};
     float radius = 0;
     float velocityY = 0.0f;
     float rotation = 0.0f;
@@ -22,21 +20,16 @@ struct Flappy
     float speed = INITIAL_SPEED;
 };
 
-enum class PillarType
-{
-    Normal,
-    Sliding
-};
+enum class PillarType { Normal, Sliding };
 
-struct Pillar
-{
+struct Pillar {
     int id = 0;
     PillarType type = PillarType::Normal;
-    Rectangle top = { 0, 0, 0, 0 };
-    Rectangle bottom = { 0, 0, 0, 0 };
-    Rectangle door = { 0, 0, 0, 0 };
+    Rectangle top = {0, 0, 0, 0};
+    Rectangle bottom = {0, 0, 0, 0};
+    Rectangle door = {0, 0, 0, 0};
     float gapSize = PILLAR_GAP;
-    Vector2 lockCenter = { 0, 0};
+    Vector2 lockCenter = {0, 0};
     float lockRadius = 0.0f;
     bool isLocked = false;
     bool isScored = false;
@@ -46,13 +39,11 @@ struct Pillar
     int tooltipId = 0;
 };
 
-struct Background
-{
+struct Background {
     float parallaxX = 0.0f;
 };
 
-struct Label
-{
+struct Label {
     const char *text = "";
     float x = 0;
     float y = 0;
@@ -63,22 +54,15 @@ struct Label
     float rotation = 0.0f;
 };
 
-enum class PowerUpType
-{
-    Slow,
-    Points,
-    Unlock
-};
+enum class PowerUpType { Slow, Points, Unlock };
 
-struct PowerUp
-{
+struct PowerUp {
     PowerUpType type = PowerUpType::Slow;
-    Rectangle rect = { 0.0f, 0.0f, 0.0f, 0.0f };
+    Rectangle rect = {0.0f, 0.0f, 0.0f, 0.0f};
     int tooltipId = 0;
 };
 
-struct GameBanner
-{
+struct GameBanner {
     const char *text = "";
     const char *bannerText = "";
     const char *authorText = "";
@@ -89,8 +73,7 @@ struct GameBanner
     bool isVisible = false;
 };
 
-struct Tooltip
-{
+struct Tooltip {
     int id = 0;
     const char *text = "";
     float x = 0.0f;

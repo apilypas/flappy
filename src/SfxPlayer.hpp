@@ -1,15 +1,10 @@
 #pragma once
 #include <raylib.h>
 
-enum class SfxType {
-    Jump,
-    Hit,
-    Point,
-    PowerUp,
-    Unlock
-};
+enum class SfxType { Jump, Hit, Point, PowerUp, Unlock };
 
-class SfxPlayer {
+class SfxPlayer
+{
     Sound _jumpSound;
     Sound _hitSound;
     Sound _pointSound;
@@ -17,6 +12,7 @@ class SfxPlayer {
     Sound _unlockSound;
     void PlayWithRandomPitch(Sound);
     void Play(Sound);
+
 public:
     void Initialize();
     void Play(SfxType);

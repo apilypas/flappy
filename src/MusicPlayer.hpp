@@ -2,9 +2,11 @@
 
 #include <raylib.h>
 
-class MusicPlayer {
+class MusicPlayer
+{
     Music _music;
     bool _isVolumeLowered = false;
+
 public:
     void Initialize();
     void Play();

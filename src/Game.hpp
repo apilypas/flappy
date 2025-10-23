@@ -1,19 +1,20 @@
 #pragma once
-#include <map>
-#include <vector>
-#include "Entities.hpp"
+#include "BackgroundRenderer.hpp"
 #include "BannerMessageSource.hpp"
+#include "Entities.hpp"
 #include "FlappyRenderer.hpp"
+#include "GameBannerRenderer.hpp"
+#include "LabelRenderer.hpp"
 #include "MusicPlayer.hpp"
 #include "PillarRenderer.hpp"
-#include "BackgroundRenderer.hpp"
-#include "LabelRenderer.hpp"
 #include "PowerUpRenderer.hpp"
-#include "GameBannerRenderer.hpp"
 #include "SfxPlayer.hpp"
 #include "TooltipRenderer.hpp"
+#include <map>
+#include <vector>
 
-class Game {
+class Game
+{
     bool _showDebug;
     int _nextPillarId = 0;
     int _nextTooltipId = 0;
@@ -22,7 +23,7 @@ class Game {
     BannerMessageSource _bannerMessageSource;
 
     Camera2D _camera;
-    
+
     GameState _gameState;
     Flappy _flappy;
     std::vector<Pillar> _pillars;
@@ -33,7 +34,7 @@ class Game {
 
     GameBanner _gameBanner;
     Label _scoreLabel;
-    
+
     BackgroundRenderer _backgroundRenderer;
     FlappyRenderer _flappyRenderer;
     PillarRenderer _pillarRenderer;
@@ -44,10 +45,12 @@ class Game {
 
     SfxPlayer _sfxPlayer;
     MusicPlayer _musicPlayer;
+
 public:
     void Initialize();
     void DoFrame();
     void Uninitialize();
+
 private:
     void Reset();
     Pillar CreatePillar(float, float);
@@ -62,6 +65,6 @@ private:
     bool HandleDoorUnlocks();
     Label CreateBanner(float, float);
     void UpdateTooltips(float);
-    void CreateTooltip(PowerUp&);
-    void CreateTooltip(Pillar&);
+    void CreateTooltip(PowerUp &);
+    void CreateTooltip(Pillar &);
 };

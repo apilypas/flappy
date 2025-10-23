@@ -1,9 +1,9 @@
-#include <raylib.h>
 #include "SfxPlayer.hpp"
+#include <raylib.h>
 
 void SfxPlayer::PlayWithRandomPitch(Sound sound)
 {
-    auto pitch = (float)GetRandomValue(80, 120) / 100.0f;
+    float pitch = (float)GetRandomValue(80, 120) / 100.0f;
     SetSoundPitch(sound, pitch);
     PlaySound(sound);
 }

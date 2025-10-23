@@ -14,8 +14,7 @@ void MusicPlayer::Play()
 
 void MusicPlayer::MakeVolumeLower()
 {
-    if (!_isVolumeLowered)
-    {
+    if (!_isVolumeLowered) {
         _isVolumeLowered = true;
         SetMusicVolume(_music, 0.3f);
     }
@@ -23,19 +22,12 @@ void MusicPlayer::MakeVolumeLower()
 
 void MusicPlayer::MakeVolumeHigher()
 {
-    if (_isVolumeLowered)
-    {
+    if (_isVolumeLowered) {
         _isVolumeLowered = false;
         SetMusicVolume(_music, 0.5f);
     }
 }
 
-void MusicPlayer::Update()
-{
-    UpdateMusicStream(_music);
-}
+void MusicPlayer::Update() { UpdateMusicStream(_music); }
 
-void MusicPlayer::Uninitialize()
-{
-    UnloadMusicStream(_music);
-}
+void MusicPlayer::Uninitialize() { UnloadMusicStream(_music); }
